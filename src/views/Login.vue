@@ -82,8 +82,7 @@ export default {
             password: this.password,
             autoLogin: this.autoLogin,
           });
-          // 로그인 후 원하는 페이지(예: 대시보드)로 이동
-          this.$router.push("/dashboard");
+          this.$router.push("/");
         } else {
           alert(data.message || "로그인 실패");
         }
