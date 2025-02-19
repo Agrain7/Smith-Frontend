@@ -1,8 +1,7 @@
-// store/index.js
+// frontend/store/index.js
 import { createStore } from 'vuex';
 
-// 환경변수를 통해 API URL을 동적으로 설정 (Vite의 경우)
-// .env 파일에 VITE_API_URL이 설정되어 있어야 합니다.
+// Vite 환경 변수에서 API URL을 가져옵니다.
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default createStore({
@@ -29,7 +28,6 @@ export default createStore({
   actions: {
     async login({ commit }, payload) {
       try {
-        // POST 요청을 백엔드의 /api/login 엔드포인트로 전송
         const response = await fetch(`${apiUrl}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

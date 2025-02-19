@@ -56,12 +56,12 @@ export default {
   data() {
     return {
       username: "",
-      // password: "",
-      autoLogin: false, // 체크박스 상태 (자동로그인 여부)
+      password: "",
+      autoLogin: false,
     };
   },
   methods: {
-        async login() {
+    async login() {
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
         const response = await fetch(`${apiUrl}/api/login`, {
@@ -76,7 +76,14 @@ export default {
         const data = await response.json();
         if (response.ok) {
           console.log("로그인 성공:", data);
-          this.$router.push("/");
+          // Vuex 스토어의 login 액션을 통해 토큰 저장
+          await this.$store.dispatch("login", {
+            username: this.username,
+            password: this.password,
+            autoLogin: this.autoLogin,
+          });
+          // 로그인 후 원하는 페이지(예: 대시보드)로 이동
+          this.$router.push("/dashboard");
         } else {
           alert(data.message || "로그인 실패");
         }
@@ -84,6 +91,9 @@ export default {
         console.error("로그인 에러:", error);
         alert("서버와 통신 중 오류 발생");
       }
+    },
+    goToSignup() {
+      this.$router.push("/signup");
     },
   },
 };
