@@ -104,14 +104,15 @@ export default {
     };
   },
   methods: {
-    async signup() {
+      async signup() {
       if (this.form.password !== this.form.passwordConfirm) {
         alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         return;
       }
       try {
-        // 백엔드의 회원가입 API 호출
-        const response = await fetch("http://localhost:5000/api/signup", {
+        // 환경변수에서 백엔드 URL 가져오기 (Vite의 경우)
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/api/signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

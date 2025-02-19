@@ -61,23 +61,29 @@ export default {
     };
   },
   methods: {
-    async login() {
-      // Vuex의 login 액션에 autoLogin 값도 함께 전달
-      const result = await this.$store.dispatch("login", {
-        username: this.username,
-        password: this.password,
-        autoLogin: this.autoLogin,
-      });
-      if (result.success) {
-        console.log("로그인 성공");
-        // 로그인 성공 후 원하는 페이지로 이동
-        this.$router.push("/");
-      } else {
-        alert(result.message || "로그인 실패");
+        async login() {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/api/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: this.username,
+            password: this.password,
+            autoLogin: this.autoLogin,
+          }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          console.log("로그인 성공:", data);
+          this.$router.push("/");
+        } else {
+          alert(data.message || "로그인 실패");
+        }
+      } catch (error) {
+        console.error("로그인 에러:", error);
+        alert("서버와 통신 중 오류 발생");
       }
-    },
-    goToSignup() {
-      this.$router.push("/signup");
     },
   },
 };
