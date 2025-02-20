@@ -45,7 +45,6 @@
 
       <!-- 세부단가 견적요청 섹션 -->
       <div class="estimate-request">
-        <!-- disabled 속성 대신 클래스로 스타일 적용 -->
         <button 
           class="estimate-button" 
           :class="{ disabled: !isLoggedIn }"
@@ -53,8 +52,6 @@
           세부단가 견적요청
         </button>
         <button class="help-button" @click="showHelp">?</button>
-        <!-- 숨겨진 파일 입력 -->
-        <input type="file" ref="fileInput" style="display: none" @change="handleFileUpload" />
       </div>
 
       <!-- 진행상황 텍스트 (오른쪽 정렬) -->
@@ -70,6 +67,12 @@
         <button class="buy-button" @click="buyNow" :disabled="isDetailDisabled">바로 구매 ></button>
       </div>
     </div>
+
+    <!-- 모달 컴포넌트 (로그인 상태라면 열림) -->
+    <EstimateRequestModal 
+      v-if="showEstimateModal" 
+      :userData="currentUserData" 
+      @close="showEstimateModal = false" />
   </div>
 </template>
 
@@ -81,12 +84,15 @@ import productImage4 from '@/assets/product4.webp';
 import productImage5 from '@/assets/product5.webp';
 import productImage6 from '@/assets/product6.webp';
 import emailjs from 'emailjs-com';
+import EstimateRequestModal from '@/components/EstimateRequestModal.vue';
 
 export default {
   name: 'ProductDetail',
+  components: {
+    EstimateRequestModal,
+  },
   data() {
     return {
-      // 제품 데이터는 라우트 파라미터(productId)로 결정됩니다.
       products: {
         '현장용소부재': {
           image: productImage1,
@@ -121,10 +127,10 @@ export default {
       },
       selectedMaterial: 'SM275',
       quantity: 1,
-      // 진행상황 상태 변수
       uploadStatus: '견적파일 미제출',
       detailStatus: '세부견적 확인',
       isDetailDisabled: true,
+      showEstimateModal: false, // 모달 표시 여부
     };
   },
   computed: {
@@ -133,7 +139,6 @@ export default {
       return this.products[productId] || { name: '', description: '', image: '' };
     },
     computedPrice() {
-      // SM275: (1000 + 199) * 1000 * 주문수량, SM355: (1200 + 199) * 1000 * 주문수량
       const basePrice = this.selectedMaterial === 'SM275' ? 1000 : 1200;
       const processingFee = 199;
       return (basePrice + processingFee) * 1000 * this.quantity;
@@ -141,59 +146,40 @@ export default {
     computedPriceFormatted() {
       return this.computedPrice.toLocaleString('ko-KR');
     },
-    // 로그인 상태를 Vuex에서 가져옴
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
+    },
+    currentUserData() {
+      // 토큰을 Vuex나 스토리지에서 가져와서 사용자 정보를 구성합니다.
+      const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) return {};
+      try {
+        const payload = token.split('.')[1];
+        const decoded = JSON.parse(atob(payload));
+        return {
+          username: decoded.username || '',
+          name: decoded.username || '', // 실제 사용자 이름이 토큰에 포함되지 않았다면, 추가 정보를 Vuex에 저장하거나 별도로 처리 필요
+          phone: '', // 전화번호도 별도 관리
+          email: ''  // 이메일 입력 후 수정 가능하도록
+        };
+      } catch (error) {
+        console.error("토큰 파싱 오류:", error);
+        return {};
+      }
     },
   },
   methods: {
     handleEstimateRequest() {
-      // 만약 로그인하지 않은 상태라면 경고창 표시 후 로그인 페이지로 리다이렉션
       if (!this.isLoggedIn) {
         alert("로그인 후 사용하세요.");
         this.$router.push("/login");
         return;
       }
-      // 로그인한 상태라면 기존 파일 업로드 기능 실행
-      this.triggerFileUpload();
-    },
-    triggerFileUpload() {
-      this.$refs.fileInput.click();
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        if (file.type === 'text/plain') {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const textContent = reader.result;
-            const templateParams = {
-              to_email: 'smithagent@nate.com',
-              file_content: textContent,
-              filename: file.name,
-            };
-            emailjs.send('service_ut6rmkh', 'template_f7rf82t', templateParams, 'umd5YAQiBuxttvCy2')
-              .then(
-                (response) => {
-                  console.log('이메일 전송 성공:', response.status, response.text);
-                  alert(`파일 업로드 및 전송 성공: ${file.name}`);
-                  // 파일 전송 성공 시 진행상황 업데이트
-                  this.uploadStatus = '견적파일 제출완료';
-                },
-                (error) => {
-                  console.error('이메일 전송 실패:', error);
-                  alert('파일 전송에 실패하였습니다.');
-                }
-              );
-          };
-          reader.readAsText(file);
-        } else {
-          alert('TXT 파일만 전송 가능합니다.');
-        }
-      }
+      // 모달을 열기 위한 상태 변경
+      this.showEstimateModal = true;
     },
     onDetailEstimateClick() {
-      // 로그인한 상태라면 견적 승인 여부를 확인하는 API 호출 (예시)
+      // 견적 요청 상태 확인 API 호출 (예시)
       fetch(`${import.meta.env.VITE_API_URL}/api/estimate-request/status`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -224,6 +210,9 @@ export default {
       alert('세부 단가 견적 요청에 대한 자세한 안내를 제공합니다.');
       this.isDetailDisabled = false;
     },
+  },
+  mounted() {
+    // 기존에 회원 정보를 가져오는 로직은 AdminPanel.vue에서 처리하므로, ProductDetail.vue는 제품 구매와 견적 요청 관련 기능에 집중합니다.
   },
 };
 </script>
@@ -273,7 +262,7 @@ export default {
   color: #555;
 }
 
-/* 주문 정보 섹션: 왼쪽과 오른쪽 영역으로 구성 */
+/* 주문 정보 섹션 */
 .order-info {
   display: flex;
   justify-content: space-between;
@@ -312,7 +301,6 @@ export default {
   margin-top: 5px;
 }
 
-/* 오른쪽 영역: 주문수량 및 가격 */
 .order-right {
   display: flex;
   flex-direction: column;
@@ -341,7 +329,6 @@ export default {
   font-weight: bold;
 }
 
-/* 가격 표시 영역을 한 줄로 배치 */
 .price-display {
   display: flex;
   align-items: center;
@@ -383,7 +370,6 @@ export default {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* disabled 클래스로 시각적 효과 적용 */
 .estimate-button.disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -435,7 +421,7 @@ export default {
   background-color: #f0f0f0;
 }
 
-/* 진행상황 텍스트 (오른쪽 정렬) */
+/* 진행상황 텍스트 */
 .progress-status {
   text-align: right;
 }
@@ -446,7 +432,7 @@ export default {
   color: #333;
 }
 
-/* 액션 버튼 (바로 구매 버튼) */
+/* 액션 버튼 */
 .action-buttons {
   display: flex;
   justify-content: flex-end;
