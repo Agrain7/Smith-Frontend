@@ -56,8 +56,8 @@ const routes = [
     path: '/admin', 
     name: 'AdminPanel', 
     component: AdminPanel,
-    meta: { requiresAdmin: true }  // 관리자 전용 페이지임을 명시
-  },
+    meta: { requiresAdmin: true, minimalLayout: true }  // 관리자 전용 페이지임을 명시
+  }
 ];
 
 const router = createRouter({
@@ -76,7 +76,6 @@ router.beforeEach((to, from, next) => {
     try {
       const payload = token.split('.')[1];
       const decoded = JSON.parse(atob(payload));
-      console.log("디코딩된 토큰:", decoded); // 디버깅 로그
       if (decoded.isAdmin) {
         next();
       } else {
