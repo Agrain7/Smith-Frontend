@@ -100,6 +100,7 @@ export default {
 
 <style scoped>
 .banner {
+  width: 100%;
   position: relative;
   width: 1080px;       /* 전체 배너 영역 1080px 고정 */
   margin: 0 auto;
@@ -168,5 +169,22 @@ export default {
 .banner-controls li.active .banner-button {
   border-color: #0078d7;
   background-color: #d0e6ff;
+}
+
+/* 다크모드 적용: prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+  .banner-overlay {
+    background-color: rgba(255, 255, 255, 0.9); /* 필요에 따라 조정 */
+    color: #000;
+  }
+  .banner-button {
+    border-color: #888;
+    background-color: #333;
+    color: #fff;
+  }
+  .banner-button:hover {
+    border-color: #aaa;
+    background-color: #444;
+  }
 }
 </style>

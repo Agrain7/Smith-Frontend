@@ -151,6 +151,7 @@ export default {
   }
   
   .signup-container {
+    width: 100%;
     width: 400px;
     padding: 30px;
     background-color: #fff;

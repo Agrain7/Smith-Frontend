@@ -45,7 +45,11 @@
 
       <!-- 세부단가 견적요청 섹션 -->
       <div class="estimate-request">
-        <button class="estimate-button" @click="triggerFileUpload">
+        <!-- disabled 속성 대신 클래스로 스타일 적용 -->
+        <button 
+          class="estimate-button" 
+          :class="{ disabled: !isLoggedIn }"
+          @click="handleEstimateRequest">
           세부단가 견적요청
         </button>
         <button class="help-button" @click="showHelp">?</button>
@@ -63,7 +67,7 @@
 
       <!-- 액션 버튼: 바로 구매 -->
       <div class="action-buttons">
-        <button class="buy-button" @click="buyNow" :disabled="isDetailDisabled" >바로 구매 ></button>
+        <button class="buy-button" @click="buyNow" :disabled="isDetailDisabled">바로 구매 ></button>
       </div>
     </div>
   </div>
@@ -117,11 +121,10 @@ export default {
       },
       selectedMaterial: 'SM275',
       quantity: 1,
-      // 진행상황 상태 변수 추가
+      // 진행상황 상태 변수
       uploadStatus: '견적파일 미제출',
       detailStatus: '세부견적 확인',
       isDetailDisabled: true,
-
     };
   },
   computed: {
@@ -138,15 +141,21 @@ export default {
     computedPriceFormatted() {
       return this.computedPrice.toLocaleString('ko-KR');
     },
+    // 로그인 상태를 Vuex에서 가져옴
+    isLoggedIn() {
+      return this.$store.getters.isLoggedIn;
+    },
   },
   methods: {
-    buyNow() {
-      const basePrice = this.selectedMaterial === 'SM275' ? 1000 : 1200;
-      const processingFee = 199;
-      const totalPrice = (basePrice + processingFee) * 1000 * this.quantity;
-      const shippingCost = 3000; // 예시 배송비
-      const url = `/purchase?price=${totalPrice}&shipping=${shippingCost}`;
-      window.open(url, '_blank', 'width=800,height=800');
+    handleEstimateRequest() {
+      // 만약 로그인하지 않은 상태라면 경고창 표시 후 로그인 페이지로 리다이렉션
+      if (!this.isLoggedIn) {
+        alert("로그인 후 사용하세요.");
+        this.$router.push("/login");
+        return;
+      }
+      // 로그인한 상태라면 기존 파일 업로드 기능 실행
+      this.triggerFileUpload();
     },
     triggerFileUpload() {
       this.$refs.fileInput.click();
@@ -183,6 +192,34 @@ export default {
         }
       }
     },
+    onDetailEstimateClick() {
+      // 로그인한 상태라면 견적 승인 여부를 확인하는 API 호출 (예시)
+      fetch(`${import.meta.env.VITE_API_URL}/api/estimate-request/status`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.approved) {
+          this.isDetailDisabled = false;
+          alert("세부견적이 승인되었습니다.");
+        } else {
+          alert("아직 견적 요청이 승인되지 않았습니다.");
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        alert("견적 요청 상태 확인 중 오류 발생");
+      });
+    },
+    buyNow() {
+      const basePrice = this.selectedMaterial === 'SM275' ? 1000 : 1200;
+      const processingFee = 199;
+      const totalPrice = (basePrice + processingFee) * 1000 * this.quantity;
+      const shippingCost = 3000; // 예시 배송비
+      const url = `/purchase?price=${totalPrice}&shipping=${shippingCost}`;
+      window.open(url, '_blank', 'width=800,height=800');
+    },
     showHelp() {
       alert('세부 단가 견적 요청에 대한 자세한 안내를 제공합니다.');
       this.isDetailDisabled = false;
@@ -193,7 +230,8 @@ export default {
 
 <style scoped>
 .product-detail {
-  width: 1080px;
+  width: 100%;
+  max-width: 1080px;
   margin: 20px auto;
   display: flex;
   gap: 20px;
@@ -244,7 +282,6 @@ export default {
   padding: 10px;
 }
 
-/* 왼쪽 영역: 철강가격 및 가공비 */
 .order-left {
   display: flex;
   flex-direction: column;
@@ -281,7 +318,7 @@ export default {
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 20px
+  gap: 20px;
 }
 
 .quantity-input {
@@ -313,14 +350,12 @@ export default {
   text-align: right;
 }
 
-/* 예상가격 텍스트 스타일 수정 */
 .expected-price {
   font-size: 16px;
   color: #333;
   font-weight: bold;
 }
 
-/* 가격 텍스트 마진 줄여서 위로 올라오도록 */
 .product-price {
   font-size: 20px;
   font-weight: bold;
@@ -346,6 +381,12 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
+}
+
+/* disabled 클래스로 시각적 효과 적용 */
+.estimate-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .estimate-button:hover {
@@ -375,26 +416,24 @@ export default {
 }
 
 .detail-estimate-button {
-background-color: #f8f9fa;
-border: 1px solid #ddd;
-padding: 8px 12px;
-font-size: 16px;
-cursor: pointer;
-border-radius: 4px;
-transition: background-color 0.3s;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 .detail-estimate-button:hover {
   background-color: #e2e6ea;
 }
 
-/* 버튼이 비활성화되었을 때 스타일 */
 .detail-estimate-button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
   background-color: #f0f0f0;
 }
-
 
 /* 진행상황 텍스트 (오른쪽 정렬) */
 .progress-status {
@@ -409,28 +448,28 @@ transition: background-color 0.3s;
 
 /* 액션 버튼 (바로 구매 버튼) */
 .action-buttons {
-display: flex;
-justify-content: flex-end;
-gap: 15px;
-margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
 }
 
 .buy-button {
-width: 50%;
-padding: 10px 20px;
-font-size: 16px;
-font-weight: bold;
-cursor: pointer;
-border: 2px solid #007bff;
-background-color: #007bff;
-color: #fff;
-border-radius: 4px;
-transition: background-color 0.3s, border-color 0.3s;
+  width: 50%;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid #007bff;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 4px;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .buy-button:disabled {
-background-color: #ccc;
-border-color: #ccc;
-cursor: not-allowed;
+  background-color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
 }
 </style>

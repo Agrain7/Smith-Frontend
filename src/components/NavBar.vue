@@ -30,18 +30,13 @@ export default {
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
     },
-    // token에서 사용자명을 추출하는 computed property
+    // 토큰에서 사용자명을 추출하는 computed property
     userName() {
       const token = this.$store.state.token;
-      if (!token) {
-        return '';
-      }
+      if (!token) return '';
       try {
-        // JWT 토큰은 header.payload.signature 구조입니다.
         const payload = token.split('.')[1];
-        // Base64로 인코딩된 payload를 디코딩
         const decodedPayload = JSON.parse(atob(payload));
-        // 토큰 생성 시 { username: user.username }로 생성되었다면 username을 사용
         return decodedPayload.username || '';
       } catch (error) {
         console.error("토큰 파싱 에러:", error);
@@ -60,7 +55,8 @@ export default {
 
 <style scoped>
 .top-nav-bar {
-  width: 1080px;
+  width: 100%;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 5px 20px;
   box-sizing: border-box;

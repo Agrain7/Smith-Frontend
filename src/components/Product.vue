@@ -84,6 +84,7 @@ export default {
 
 <style scoped>
 .product-section {
+  width: 100%;
   width: 1080px;
   margin: 20px auto;
   padding: 20px;
