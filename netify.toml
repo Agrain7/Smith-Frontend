@@ -2,3 +2,8 @@
   for = "/*"
   [headers.values]
     Content-Security-Policy = "default-src 'self'; connect-src 'self' https://smithapp-bbc6f2929f0b.herokuapp.com"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
