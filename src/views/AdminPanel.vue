@@ -36,20 +36,24 @@
     },
     methods: {
       fetchUsers() {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        fetch(`${apiUrl}/api/users`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        })
-          .then(res => res.json())
-          .then(data => {
-            this.users = data.users;
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+          const token = localStorage.getItem('token');  // 저장된 토큰 가져오기
+          fetch(`${apiUrl}/api/users`, {
+            method: "GET",
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`  // 인증 헤더에 토큰 추가
+            },
           })
-          .catch(err => {
-            console.error("회원 정보 불러오기 오류:", err);
-            alert("회원 정보를 불러오는데 실패했습니다.");
-          });
-      },
+            .then(res => res.json())
+            .then(data => {
+              this.users = data.users;
+            })
+            .catch(err => {
+              console.error("회원 정보 불러오기 오류:", err);
+              alert("회원 정보를 불러오는데 실패했습니다.");
+            });
+        },
       deleteUser(userId) {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         if (confirm("정말 삭제하시겠습니까?")) {
