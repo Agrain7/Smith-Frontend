@@ -16,7 +16,11 @@
       <li v-if="isLoggedIn">
         <a href="#" @click.prevent="logout">로그아웃</a>
       </li>
-      <li>
+      <!-- 관리자인 경우 "관리자 페이지" 버튼, 아닌 경우 "고객센터" 버튼 -->
+      <li v-if="isAdmin">
+        <router-link to="/admin">관리자 페이지</router-link>
+      </li>
+      <li v-else>
         <a href="#">고객센터</a>
       </li>
     </ul>
@@ -30,7 +34,6 @@ export default {
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
     },
-    // 토큰에서 사용자명을 추출하는 computed property
     userName() {
       const token = this.$store.state.token;
       if (!token) return '';
@@ -41,6 +44,18 @@ export default {
       } catch (error) {
         console.error("토큰 파싱 에러:", error);
         return '';
+      }
+    },
+    isAdmin() {
+      const token = this.$store.state.token;
+      if (!token) return false;
+      try {
+        const payload = token.split('.')[1];
+        const decodedPayload = JSON.parse(atob(payload));
+        return decodedPayload.isAdmin === true;
+      } catch (error) {
+        console.error("토큰 파싱 에러:", error);
+        return false;
       }
     },
   },
