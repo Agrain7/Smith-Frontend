@@ -13,10 +13,15 @@
         @click="currentTab = 'estimates'">
         프로젝트 및 견적서 전송
       </button>
+      <button 
+        :class="{ active: currentTab === 'completed' }" 
+        @click="currentTab = 'completed'">
+        완료 프로젝트
+      </button>
     </div>
 
     <div class="tab-content">
-      <!-- 회원관리 탭 -->
+      <!-- 회원관리 탭 (기존 코드 유지) -->
       <div v-if="currentTab === 'members'">
         <table>
           <thead>
@@ -52,30 +57,58 @@
               <th>전화번호</th>
               <th>이메일주소</th>
               <th>프로젝트명</th>
-              <th>견적서파일 확인하기</th>
+              <th>견적요청 파일</th>
               <th>견적서 전송하기</th>
               <th>프로젝트 완료</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(estimate, index) in estimateRequests" :key="index">
+            <tr v-for="(estimate, index) in pendingEstimates" :key="estimate._id">
               <td>{{ estimate.username }}</td>
               <td>{{ estimate.name }}</td>
               <td>{{ estimate.phone }}</td>
               <td>{{ estimate.email }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <button v-if="estimate.fileName" @click="viewFile(estimate)">
+                <a :href="estimate.fileUrl" target="_blank">
                   {{ estimate.fileName }}
-                </button>
-                <span v-else>파일 없음</span>
+                </a>
               </td>
               <td>
-                <button @click="updateEstimateFile(estimate)">파일 업로드</button>
                 <button @click="sendEstimate(estimate)">전송</button>
               </td>
               <td>
                 <button @click="completeProject(estimate)">완료</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 완료 프로젝트 탭 -->
+      <div v-if="currentTab === 'completed'">
+        <table>
+          <thead>
+            <tr>
+              <th>아이디</th>
+              <th>이름</th>
+              <th>전화번호</th>
+              <th>이메일주소</th>
+              <th>프로젝트명</th>
+              <th>견적요청 파일</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(estimate, index) in completedEstimates" :key="estimate._id">
+              <td>{{ estimate.username }}</td>
+              <td>{{ estimate.name }}</td>
+              <td>{{ estimate.phone }}</td>
+              <td>{{ estimate.email }}</td>
+              <td>{{ estimate.projectName }}</td>
+              <td>
+                <a :href="estimate.fileUrl" target="_blank">
+                  {{ estimate.fileName }}
+                </a>
               </td>
             </tr>
           </tbody>
@@ -86,19 +119,27 @@
 </template>
 
 <script>
-import emailjs from 'emailjs-com';
-
 export default {
   name: "AdminPanel",
   data() {
     return {
       currentTab: 'members', // 기본 탭: 회원관리
       users: [],
-      estimateRequests: []  // 견적 요청 목록
+      estimates: []  // 모든 견적 요청 데이터
     };
   },
+  computed: {
+    // pendingEstimates: 아직 프로젝트 완료 처리되지 않은 견적 요청
+    pendingEstimates() {
+      return this.estimates.filter(estimate => !estimate.completed);
+    },
+    // completedEstimates: 완료된 견적 요청
+    completedEstimates() {
+      return this.estimates.filter(estimate => estimate.completed);
+    }
+  },
   methods: {
-    // 회원관리 관련 메서드
+    // 회원 관리 관련 메서드
     fetchUsers() {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -159,7 +200,7 @@ export default {
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            this.estimateRequests = data.estimates;
+            this.estimates = data.estimates;
           } else {
             console.error("견적 요청 데이터 불러오기 오류:", data);
             alert("견적 요청 데이터를 불러오는데 실패했습니다.");
@@ -170,14 +211,8 @@ export default {
           alert("견적 요청 데이터를 불러오는데 실패했습니다.");
         });
     },
-    viewFile(estimate) {
-      alert(`파일명: ${estimate.fileName}\n내용:\n${estimate.fileContent}`);
-    },
-    updateEstimateFile(estimate) {
-      alert(`사용자 ${estimate.username}의 견적서 파일을 업데이트합니다.`);
-      // 실제 업데이트 로직 추가 필요
-    },
     sendEstimate(estimate) {
+      // 이메일 전송 기능 예시 (실제 구현에 따라 수정)
       const templateParams = {
         username: estimate.username,
         name: estimate.name,
@@ -199,8 +234,32 @@ export default {
         );
     },
     completeProject(estimate) {
-      alert(`사용자 ${estimate.username}의 프로젝트가 완료되었습니다.`);
-      // 필요 시 상태 업데이트 로직 추가
+      // 프로젝트 완료 처리 (백엔드에 완료 상태 업데이트 요청 보내기)
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      fetch(`${apiUrl}/api/estimate-request/${estimate._id}/complete`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert("프로젝트가 완료 처리되었습니다.");
+            this.fetchEstimates();
+          } else {
+            alert(data.message || "프로젝트 완료 처리에 실패했습니다.");
+          }
+        })
+        .catch(err => {
+          console.error("프로젝트 완료 처리 오류:", err);
+          alert("프로젝트 완료 처리 중 오류 발생");
+        });
+    },
+    updateEstimateFile(estimate) {
+      alert(`사용자 ${estimate.username}의 견적서 파일을 업데이트합니다.`);
+      // 실제 파일 업데이트 로직 추가 필요
+    },
+    viewFile(estimate) {
+      window.open(estimate.fileUrl, '_blank');
     }
   },
   mounted() {
@@ -219,8 +278,6 @@ export default {
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
 }
-
-/* 탭 메뉴 스타일 */
 .tabs {
   display: flex;
   gap: 10px;
@@ -239,8 +296,6 @@ export default {
   background-color: #007bff;
   color: #fff;
 }
-
-/* 테이블 스타일 */
 table {
   width: 100%;
   border-collapse: collapse;
