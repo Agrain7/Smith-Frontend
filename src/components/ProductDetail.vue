@@ -83,7 +83,6 @@ import productImage3 from '@/assets/product3.webp';
 import productImage4 from '@/assets/product4.webp';
 import productImage5 from '@/assets/product5.webp';
 import productImage6 from '@/assets/product6.webp';
-import emailjs from 'emailjs-com';
 import EstimateRequestModal from '@/components/EstimateRequestModal.vue';
 
 export default {
@@ -150,17 +149,17 @@ export default {
       return this.$store.getters.isLoggedIn;
     },
     currentUserData() {
-      // 토큰을 Vuex나 스토리지에서 가져와서 사용자 정보를 구성합니다.
       const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
       if (!token) return {};
       try {
         const payload = token.split('.')[1];
-        const decoded = JSON.parse(atob(payload));
+        // 한글 깨짐 문제를 방지하기 위해 decodeURIComponent(escape(...)) 사용 가능
+        const decoded = JSON.parse(decodeURIComponent(escape(window.atob(payload))));
         return {
           username: decoded.username || '',
-          name: decoded.username || '', // 실제 사용자 이름이 토큰에 포함되지 않았다면, 추가 정보를 Vuex에 저장하거나 별도로 처리 필요
-          phone: '', // 전화번호도 별도 관리
-          email: ''  // 이메일 입력 후 수정 가능하도록
+          name: decoded.name || '',  // 수정: decoded.name 사용
+          phone: decoded.phone || '',  // decoded.phone 사용 (토큰에 포함되어 있어야 함)
+          email: decoded.email || ''   // 이메일 정보는 별도로 저장하거나 빈 문자열 처리
         };
       } catch (error) {
         console.error("토큰 파싱 오류:", error);
@@ -175,7 +174,6 @@ export default {
         this.$router.push("/login");
         return;
       }
-      // 모달을 열기 위한 상태 변경
       this.showEstimateModal = true;
     },
     onDetailEstimateClick() {
@@ -184,19 +182,19 @@ export default {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.approved) {
-          this.isDetailDisabled = false;
-          alert("세부견적이 승인되었습니다.");
-        } else {
-          alert("아직 견적 요청이 승인되지 않았습니다.");
-        }
-      })
-      .catch(error => {
-        console.error(error);
-        alert("견적 요청 상태 확인 중 오류 발생");
-      });
+        .then(res => res.json())
+        .then(data => {
+          if (data.approved) {
+            this.isDetailDisabled = false;
+            alert("세부견적이 승인되었습니다.");
+          } else {
+            alert("아직 견적 요청이 승인되지 않았습니다.");
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          alert("견적 요청 상태 확인 중 오류 발생");
+        });
     },
     buyNow() {
       const basePrice = this.selectedMaterial === 'SM275' ? 1000 : 1200;
@@ -211,9 +209,6 @@ export default {
       this.isDetailDisabled = false;
     },
   },
-  mounted() {
-    // 기존에 회원 정보를 가져오는 로직은 AdminPanel.vue에서 처리하므로, ProductDetail.vue는 제품 구매와 견적 요청 관련 기능에 집중합니다.
-  },
 };
 </script>
 
@@ -227,42 +222,31 @@ export default {
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
 }
-
-/* 왼쪽 영역: 이미지 */
 .left-side {
   flex: 1;
 }
-
 .product-image {
   width: 100%;
   object-fit: contain;
 }
-
-/* 오른쪽 영역: 제품 정보 및 액션 영역 */
 .right-side {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-
-/* 중앙 섹션: 제품명, 설명 중앙 정렬 */
 .middle-section {
   text-align: center;
 }
-
 .product-name {
   font-size: 28px;
   font-weight: bold;
   margin: 0;
 }
-
 .product-description {
   font-size: 16px;
   color: #555;
 }
-
-/* 주문 정보 섹션 */
 .order-info {
   display: flex;
   justify-content: space-between;
@@ -270,37 +254,31 @@ export default {
   border: 1px solid #ddd;
   padding: 10px;
 }
-
 .order-left {
   display: flex;
   flex-direction: column;
 }
-
 .price-title {
   font-size: 16px;
   font-weight: bold;
   margin: 0 0 5px;
   text-align: left;
 }
-
 .material-selection label {
   font-size: 16px;
   cursor: pointer;
   margin-bottom: 5px;
 }
-
 .material-price {
   margin-left: 5px;
   font-size: 14px;
   color: #777;
 }
-
 .processing-fee {
   font-size: 14px;
   color: #555;
   margin-top: 5px;
 }
-
 .order-right {
   display: flex;
   flex-direction: column;
@@ -308,14 +286,12 @@ export default {
   justify-content: space-between;
   gap: 20px;
 }
-
 .quantity-input {
   font-size: 16px;
   font-weight: bold;
   display: flex;
   align-items: center;
 }
-
 .quantity-input input {
   width: 80px;
   margin: 0 5px;
@@ -323,12 +299,10 @@ export default {
   font-size: 16px;
   padding: 2px 4px;
 }
-
 .unit-text {
   font-size: 16px;
   font-weight: bold;
 }
-
 .price-display {
   display: flex;
   align-items: center;
@@ -336,28 +310,23 @@ export default {
   margin-top: 1px;
   text-align: right;
 }
-
 .expected-price {
   font-size: 16px;
   color: #333;
   font-weight: bold;
 }
-
 .product-price {
   font-size: 20px;
   font-weight: bold;
   color: #d9534f;
   margin: 0;
 }
-
-/* 세부단가 견적요청 섹션 */
 .estimate-request {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
 }
-
 .estimate-button {
   padding: 8px 12px;
   font-size: 14px;
@@ -369,17 +338,14 @@ export default {
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
 }
-
 .estimate-button.disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .estimate-button:hover {
   background-color: #28a745;
   color: #fff;
 }
-
 .help-button {
   width: 40px;
   height: 40px;
@@ -395,12 +361,10 @@ export default {
   align-items: center;
   justify-content: center;
 }
-
 .help-button:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
-
 .detail-estimate-button {
   background-color: #f8f9fa;
   border: 1px solid #ddd;
@@ -410,36 +374,25 @@ export default {
   border-radius: 4px;
   transition: background-color 0.3s;
 }
-
 .detail-estimate-button:hover {
   background-color: #e2e6ea;
 }
-
 .detail-estimate-button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
   background-color: #f0f0f0;
 }
-
-/* 진행상황 텍스트 */
 .progress-status {
   text-align: right;
-}
-
-.progress-status p {
-  margin: 2px 0;
   font-size: 16px;
   color: #333;
 }
-
-/* 액션 버튼 */
 .action-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 15px;
   margin-top: 10px;
 }
-
 .buy-button {
   width: 50%;
   padding: 10px 20px;
@@ -452,7 +405,6 @@ export default {
   border-radius: 4px;
   transition: background-color 0.3s, border-color 0.3s;
 }
-
 .buy-button:disabled {
   background-color: #ccc;
   border-color: #ccc;

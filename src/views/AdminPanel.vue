@@ -42,7 +42,7 @@
         </table>
       </div>
 
-      <!-- 프로젝트 및 견적서 전송 탭 (신규 견적 요청 제출 폼 제거, 테이블만 남김) -->
+      <!-- 프로젝트 및 견적서 전송 탭 -->
       <div v-if="currentTab === 'estimates'">
         <table>
           <thead>
@@ -94,12 +94,11 @@ export default {
     return {
       currentTab: 'members', // 기본 탭: 회원관리
       users: [],
-      // 견적 요청 목록을 저장할 배열 (예시 데이터가 없으면 빈 배열)
-      estimateRequests: []
+      estimateRequests: []  // 견적 요청 목록
     };
   },
   methods: {
-    // 회원 관리 관련 메서드
+    // 회원관리 관련 메서드
     fetchUsers() {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -146,13 +145,37 @@ export default {
       return new Date(dateStr).toLocaleString();
     },
 
-    // 견적 요청 목록 관련 메서드 (예시)
+    // 견적 요청 관련 메서드
+    fetchEstimates() {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      fetch(`${apiUrl}/api/estimate-request`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            this.estimateRequests = data.estimates;
+          } else {
+            console.error("견적 요청 데이터 불러오기 오류:", data);
+            alert("견적 요청 데이터를 불러오는데 실패했습니다.");
+          }
+        })
+        .catch(err => {
+          console.error("견적 요청 데이터 불러오기 오류:", err);
+          alert("견적 요청 데이터를 불러오는데 실패했습니다.");
+        });
+    },
     viewFile(estimate) {
       alert(`파일명: ${estimate.fileName}\n내용:\n${estimate.fileContent}`);
     },
     updateEstimateFile(estimate) {
       alert(`사용자 ${estimate.username}의 견적서 파일을 업데이트합니다.`);
-      // 실제 구현 시, 해당 견적 객체의 파일 업데이트 로직 추가
+      // 실제 업데이트 로직 추가 필요
     },
     sendEstimate(estimate) {
       const templateParams = {
@@ -177,12 +200,12 @@ export default {
     },
     completeProject(estimate) {
       alert(`사용자 ${estimate.username}의 프로젝트가 완료되었습니다.`);
-      // 필요 시, 해당 견적 요청의 상태 업데이트 로직 추가
+      // 필요 시 상태 업데이트 로직 추가
     }
   },
   mounted() {
     this.fetchUsers();
-    // 실제 데이터가 있다면, 견적 요청 목록도 백엔드 API 호출을 통해 불러올 수 있습니다.
+    this.fetchEstimates();
   }
 };
 </script>
@@ -277,6 +300,4 @@ button:hover {
   border-color: #ccc;
   cursor: not-allowed;
 }
-
-/* 견적 요청 폼 관련 스타일은 제거되었습니다. */
 </style>

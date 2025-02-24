@@ -35,24 +35,24 @@ export default {
       return this.$store.getters.isLoggedIn;
     },
     userName() {
-      const token = this.$store.state.token;
+      const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
       if (!token) return '';
       try {
         const payload = token.split('.')[1];
-        const decodedPayload = JSON.parse(atob(payload));
-        return decodedPayload.username || '';
+        const decoded = JSON.parse(decodeURIComponent(escape(window.atob(payload))));
+        return decoded.name || '';
       } catch (error) {
         console.error("토큰 파싱 에러:", error);
         return '';
       }
     },
     isAdmin() {
-      const token = this.$store.state.token;
+      const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
       if (!token) return false;
       try {
         const payload = token.split('.')[1];
-        const decodedPayload = JSON.parse(atob(payload));
-        return decodedPayload.isAdmin === true;
+        const decoded = JSON.parse(decodeURIComponent(escape(window.atob(payload))));
+        return decoded.isAdmin === true;
       } catch (error) {
         console.error("토큰 파싱 에러:", error);
         return false;
