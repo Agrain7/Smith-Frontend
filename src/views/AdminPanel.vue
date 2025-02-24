@@ -75,7 +75,8 @@
                 </a>
               </td>
               <td>
-                <button @click="sendEstimate(estimate)">전송</button>
+                <!-- 견적서 전송 기능을 제거하고 단순 알림 -->
+                <button @click="notifyEstimateSend(estimate)">전송</button>
               </td>
               <td>
                 <button @click="completeProject(estimate)">완료</button>
@@ -129,11 +130,11 @@ export default {
     };
   },
   computed: {
-    // pendingEstimates: 아직 프로젝트 완료 처리되지 않은 견적 요청
+    // 아직 완료되지 않은 견적 요청
     pendingEstimates() {
       return this.estimates.filter(estimate => !estimate.completed);
     },
-    // completedEstimates: 완료된 견적 요청
+    // 완료된 견적 요청
     completedEstimates() {
       return this.estimates.filter(estimate => estimate.completed);
     }
@@ -211,30 +212,12 @@ export default {
           alert("견적 요청 데이터를 불러오는데 실패했습니다.");
         });
     },
-    sendEstimate(estimate) {
-      // 이메일 전송 기능 예시 (실제 구현에 따라 수정)
-      const templateParams = {
-        username: estimate.username,
-        name: estimate.name,
-        phone: estimate.phone,
-        projectName: estimate.projectName,
-        email: estimate.email,
-        file_content: estimate.fileContent,
-        filename: estimate.fileName
-      };
-      emailjs.send('service_ut6rmkh', 'template_f7rf82t', templateParams, 'umd5YAQiBuxttvCy2')
-        .then(
-          (response) => {
-            alert('견적서 전송 성공');
-          },
-          (error) => {
-            console.error('견적서 전송 실패:', error);
-            alert('견적서 전송에 실패하였습니다.');
-          }
-        );
+    notifyEstimateSend(estimate) {
+      // 이메일 전송 기능 대신 알림창을 띄워줍니다.
+      alert(`사용자 ${estimate.username}의 견적서 전송 요청이 접수되었습니다.`);
+      // 실제로 데이터베이스 상태 업데이트 등의 추가 로직이 필요하면 여기에 추가합니다.
     },
     completeProject(estimate) {
-      // 프로젝트 완료 처리 (백엔드에 완료 상태 업데이트 요청 보내기)
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       fetch(`${apiUrl}/api/estimate-request/${estimate._id}/complete`, {
         method: "PUT",

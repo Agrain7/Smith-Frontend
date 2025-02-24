@@ -25,7 +25,7 @@
           <label>이메일 주소:</label>
           <input type="email" v-model="form.email" placeholder="이메일을 입력하세요" required />
         </div>
-        <!-- 파일 업로드: accept 속성 제거 -->
+        <!-- 파일 업로드 (모든 파일 허용) -->
         <div class="form-group">
           <label>견적요청 파일:</label>
           <input type="file" ref="fileInput" @change="handleFileChange" required />
@@ -55,6 +55,7 @@ export default {
     return {
       form: {
         username: this.userData.username || '',
+        // 여기서 사용자 정보의 name을 올바르게 사용 (만약 userData에 name이 없다면 관리자나 로그인 로직에서 토큰에 name을 포함하도록 해야 합니다)
         name: this.userData.name || '',
         phone: this.userData.phone || '',
         projectName: '',
@@ -72,16 +73,16 @@ export default {
       if (file) {
         this.form.file = file;
       } else {
-        alert('파일 선택에 문제가 발생했습니다.');
+        alert('파일을 선택하세요.');
         this.$refs.fileInput.value = null;
       }
     },
     submitEstimate() {
       if (!this.form.file) {
-        alert('견적용 파일을 선택하세요.');
+        alert('파일을 선택하세요.');
         return;
       }
-      // FormData 객체 생성하여 파일과 기타 폼 데이터를 함께 전송
+      // FormData 객체를 생성하여 파일 및 기타 폼 데이터를 함께 전송
       const formData = new FormData();
       formData.append('estimateFile', this.form.file);
       formData.append('username', this.form.username);
@@ -89,9 +90,8 @@ export default {
       formData.append('phone', this.form.phone);
       formData.append('email', this.form.email);
       formData.append('projectName', this.form.projectName);
-
+      
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      // 파일 업로드 엔드포인트 호출
       fetch(`${apiUrl}/api/upload-estimate`, {
         method: 'POST',
         body: formData
@@ -99,7 +99,9 @@ export default {
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            alert("파일 업로드가 완료되었습니다. 파일 URL: " + data.fileUrl);
+            alert("파일 업로드 성공: " + data.fileName);
+            // 파일 업로드가 성공하면 백엔드에 견적 요청 정보(파일 URL 등)를 저장하는 로직을 추가할 수 있습니다.
+            // 예를 들어, 추가 POST 요청을 보내거나 Vuex 상태에 저장하는 방법 등이 있습니다.
             this.close();
           } else {
             alert(data.message || "파일 업로드에 실패했습니다.");
