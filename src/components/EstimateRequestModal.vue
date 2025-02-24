@@ -41,8 +41,6 @@
 </template>
 
 <script>
-import emailjs from 'emailjs-com';
-
 export default {
   name: 'EstimateRequestModal',
   props: {
@@ -55,7 +53,6 @@ export default {
     return {
       form: {
         username: this.userData.username || '',
-        // 여기서 사용자 정보의 name을 올바르게 사용 (만약 userData에 name이 없다면 관리자나 로그인 로직에서 토큰에 name을 포함하도록 해야 합니다)
         name: this.userData.name || '',
         phone: this.userData.phone || '',
         projectName: '',
@@ -82,29 +79,50 @@ export default {
         alert('파일을 선택하세요.');
         return;
       }
-      // FormData 객체를 생성하여 파일 및 기타 폼 데이터를 함께 전송
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // 파일 업로드를 위한 FormData 생성
       const formData = new FormData();
       formData.append('estimateFile', this.form.file);
-      formData.append('username', this.form.username);
-      formData.append('name', this.form.name);
-      formData.append('phone', this.form.phone);
-      formData.append('email', this.form.email);
-      formData.append('projectName', this.form.projectName);
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // 먼저 파일 업로드 요청 보내기
       fetch(`${apiUrl}/api/upload-estimate`, {
         method: 'POST',
         body: formData
       })
         .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            alert("파일 업로드 성공: " + data.fileName);
-            // 파일 업로드가 성공하면 백엔드에 견적 요청 정보(파일 URL 등)를 저장하는 로직을 추가할 수 있습니다.
-            // 예를 들어, 추가 POST 요청을 보내거나 Vuex 상태에 저장하는 방법 등이 있습니다.
-            this.close();
+        .then(uploadData => {
+          if (uploadData.success && uploadData.fileUrl && uploadData.fileName) {
+            alert("파일 업로드 성공!");
+            // 파일 업로드 후, 견적 요청 정보를 백엔드에 저장하는 POST 요청 보내기
+            const payload = {
+              username: this.form.username,
+              name: this.form.name,
+              phone: this.form.phone,
+              email: this.form.email,
+              projectName: this.form.projectName,
+              fileUrl: uploadData.fileUrl,  // 백엔드에서 생성한 파일 URL
+              fileName: uploadData.fileName // 백엔드에서 반환한 파일명
+            };
+            fetch(`${apiUrl}/api/estimate-request`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  alert("견적 요청이 성공적으로 제출되었습니다.");
+                  this.close();
+                } else {
+                  alert(data.message || "견적 요청 제출에 실패했습니다.");
+                }
+              })
+              .catch(err => {
+                console.error("견적 요청 제출 오류:", err);
+                alert("견적 요청 제출 중 오류 발생");
+              });
           } else {
-            alert(data.message || "파일 업로드에 실패했습니다.");
+            alert(uploadData.message || "파일 업로드에 실패했습니다.");
           }
         })
         .catch(err => {
