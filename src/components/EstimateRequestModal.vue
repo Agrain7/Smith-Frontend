@@ -1,7 +1,7 @@
 <template>
   <div class="modal-overlay" @click.self="close">
     <div class="modal-content">
-      <!-- 부재종류 표시 -->
+      <!-- 부재종류 표시 (현재 라우트의 productId 사용) -->
       <div class="product-type">
         부재종류: {{ productType }}
       </div>
@@ -66,6 +66,7 @@ export default {
     };
   },
   computed: {
+    // 현재 라우트 파라미터에서 부재종류(제품명)를 가져옵니다.
     productType() {
       return this.$route.params.productId || '';
     }
@@ -88,7 +89,8 @@ export default {
         alert('파일을 선택하세요.');
         return;
       }
-      // FormData 객체 생성하여 파일과 기타 폼 데이터를 함께 전송
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // FormData 객체 생성하여 파일 및 기타 폼 데이터를 함께 전송
       const formData = new FormData();
       formData.append('estimateFile', this.form.file);
       formData.append('username', this.form.username);
@@ -96,9 +98,8 @@ export default {
       formData.append('phone', this.form.phone);
       formData.append('email', this.form.email);
       formData.append('projectName', this.form.projectName);
-      formData.append('productType', this.productType); // 부재종류 추가
+      formData.append('productType', this.productType);
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       fetch(`${apiUrl}/api/upload-estimate`, {
         method: 'POST',
         body: formData
@@ -107,8 +108,35 @@ export default {
         .then(data => {
           if (data.success) {
             alert("파일 업로드 성공!");
-            // 파일 업로드 후 추가 로직(백엔드에 견적 요청 정보 저장 등) 가능
-            this.close();
+            // 파일 업로드가 성공하면, 백엔드에 견적 요청 정보를 저장하는 POST 요청을 추가합니다.
+            const payload = {
+              username: this.form.username,
+              name: this.form.name,
+              phone: this.form.phone,
+              email: this.form.email,
+              projectName: this.form.projectName,
+              productType: this.productType,
+              fileUrl: data.fileUrl,    // 업로드 응답으로 받은 파일 URL
+              fileName: data.fileName   // 업로드 응답으로 받은 원본 파일명
+            };
+            fetch(`${apiUrl}/api/estimate-request`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            })
+              .then(res2 => res2.json())
+              .then(result => {
+                if (result.success) {
+                  alert("견적 요청이 제출되었습니다.");
+                  this.close();
+                } else {
+                  alert(result.message || "견적 요청 제출에 실패했습니다.");
+                }
+              })
+              .catch(err => {
+                console.error("견적 요청 제출 오류:", err);
+                alert("견적 요청 제출 중 오류 발생");
+              });
           } else {
             alert(data.message || "파일 업로드에 실패했습니다.");
           }
