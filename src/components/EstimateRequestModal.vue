@@ -66,7 +66,6 @@ export default {
     };
   },
   computed: {
-    // 현재 라우트 파라미터에서 부재종류(제품명)를 가져옵니다.
     productType() {
       return this.$route.params.productId || '';
     }
@@ -97,8 +96,7 @@ export default {
       formData.append('phone', this.form.phone);
       formData.append('email', this.form.email);
       formData.append('projectName', this.form.projectName);
-      // 부재종류 추가
-      formData.append('productType', this.productType);
+      formData.append('productType', this.productType); // 부재종류 추가
       
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       fetch(`${apiUrl}/api/upload-estimate`, {
@@ -109,7 +107,7 @@ export default {
         .then(data => {
           if (data.success) {
             alert("파일 업로드 성공!");
-            // 파일 업로드가 성공하면 추가로 백엔드에 견적 요청 정보(파일 URL 등)를 저장하는 로직을 넣을 수 있습니다.
+            // 파일 업로드 후 추가 로직(백엔드에 견적 요청 정보 저장 등) 가능
             this.close();
           } else {
             alert(data.message || "파일 업로드에 실패했습니다.");
