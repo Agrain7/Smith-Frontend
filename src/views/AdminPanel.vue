@@ -47,7 +47,7 @@
         </table>
       </div>
 
-      <!-- 프로젝트 및 견적서 전송 탭 -->
+      <!-- 프로젝트 및 견적서 전송 탭 (완료 버튼 추가) -->
       <div v-if="currentTab === 'estimates'">
         <table>
           <thead>
@@ -63,7 +63,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(estimate, index) in pendingEstimates" :key="estimate._id">
+            <tr v-for="estimate in pendingEstimates" :key="estimate._id">
               <td>{{ estimate.username }}</td>
               <td>{{ estimate.name }}</td>
               <td>{{ estimate.phone }}</td>
@@ -75,8 +75,7 @@
                 </a>
               </td>
               <td>
-                <!-- 견적서 전송 기능을 제거하고 단순 알림 -->
-                <button @click="notifyEstimateSend(estimate)">전송</button>
+                <button @click="sendEstimate(estimate)">전송</button>
               </td>
               <td>
                 <button @click="completeProject(estimate)">완료</button>
@@ -86,7 +85,7 @@
         </table>
       </div>
 
-      <!-- 완료 프로젝트 탭 -->
+      <!-- 완료 프로젝트 탭 (삭제 버튼 추가) -->
       <div v-if="currentTab === 'completed'">
         <table>
           <thead>
@@ -97,10 +96,11 @@
               <th>이메일주소</th>
               <th>프로젝트명</th>
               <th>견적요청 파일</th>
+              <th>삭제</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(estimate, index) in completedEstimates" :key="estimate._id">
+            <tr v-for="estimate in completedEstimates" :key="estimate._id">
               <td>{{ estimate.username }}</td>
               <td>{{ estimate.name }}</td>
               <td>{{ estimate.phone }}</td>
@@ -110,6 +110,9 @@
                 <a :href="estimate.fileUrl" target="_blank">
                   {{ estimate.fileName }}
                 </a>
+              </td>
+              <td>
+                <button @click="deleteEstimate(estimate._id)">삭제</button>
               </td>
             </tr>
           </tbody>
@@ -126,15 +129,13 @@ export default {
     return {
       currentTab: 'members', // 기본 탭: 회원관리
       users: [],
-      estimates: []  // 모든 견적 요청 데이터
+      estimates: []  // 모든 견적 요청 데이터 (각 요청에 completed 필드가 포함되어야 함)
     };
   },
   computed: {
-    // 아직 완료되지 않은 견적 요청
     pendingEstimates() {
       return this.estimates.filter(estimate => !estimate.completed);
     },
-    // 완료된 견적 요청
     completedEstimates() {
       return this.estimates.filter(estimate => estimate.completed);
     }
@@ -212,11 +213,6 @@ export default {
           alert("견적 요청 데이터를 불러오는데 실패했습니다.");
         });
     },
-    notifyEstimateSend(estimate) {
-      // 이메일 전송 기능 대신 알림창을 띄워줍니다.
-      alert(`사용자 ${estimate.username}의 견적서 전송 요청이 접수되었습니다.`);
-      // 실제로 데이터베이스 상태 업데이트 등의 추가 로직이 필요하면 여기에 추가합니다.
-    },
     completeProject(estimate) {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       fetch(`${apiUrl}/api/estimate-request/${estimate._id}/complete`, {
@@ -237,9 +233,47 @@ export default {
           alert("프로젝트 완료 처리 중 오류 발생");
         });
     },
-    updateEstimateFile(estimate) {
-      alert(`사용자 ${estimate.username}의 견적서 파일을 업데이트합니다.`);
-      // 실제 파일 업데이트 로직 추가 필요
+    deleteEstimate(estimateId) {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      if (confirm("정말 삭제하시겠습니까?")) {
+        fetch(`${apiUrl}/api/estimate-request/${estimateId}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        })
+          .then(res => res.json())
+          .then(data => {
+            alert(data.message || "삭제되었습니다.");
+            this.fetchEstimates();
+          })
+          .catch(err => {
+            console.error("견적 요청 삭제 오류:", err);
+            alert("견적 요청 삭제에 실패했습니다.");
+          });
+      }
+    },
+    sendEstimate(estimate) {
+      // 이메일 전송 기능 예시 (실제 구현에 따라 수정)
+      // 현재 sendEstimate 함수는 견적서를 이메일로 전송하는 로직입니다.
+      // 여기서는 별도의 수정 없이 기존 기능을 유지합니다.
+      const templateParams = {
+        username: estimate.username,
+        name: estimate.name,
+        phone: estimate.phone,
+        projectName: estimate.projectName,
+        email: estimate.email,
+        file_content: estimate.fileContent,
+        filename: estimate.fileName
+      };
+      emailjs.send('service_ut6rmkh', 'template_f7rf82t', templateParams, 'umd5YAQiBuxttvCy2')
+        .then(
+          (response) => {
+            alert('견적서 전송 성공');
+          },
+          (error) => {
+            console.error('견적서 전송 실패:', error);
+            alert('견적서 전송에 실패하였습니다.');
+          }
+        );
     },
     viewFile(estimate) {
       window.open(estimate.fileUrl, '_blank');
