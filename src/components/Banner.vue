@@ -1,3 +1,5 @@
+<!-- frontend/src/components/Banner.vue -->
+
 <template>
   <div class="banner">
     <!-- 배너 이미지 (클릭 시 해당 배너의 링크로 이동) -->

@@ -1,3 +1,5 @@
+<!-- frontend/src/components/Purchase.vue -->
+
 <template>
     <div class="purchase-container">
       <h1>구매 정보 입력</h1>

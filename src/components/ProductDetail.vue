@@ -1,3 +1,5 @@
+<!-- frontend/src/components/ProductDetail.vue -->
+
 <template>
   <div class="product-detail">
     <!-- 왼쪽 영역: 제품 이미지 -->

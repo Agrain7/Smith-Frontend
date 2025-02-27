@@ -1,3 +1,5 @@
+<!-- frontend/src/views/Basket.vue -->
+
 <template>
     <div class="basket-page">
       <h1>진행중인 구매 목록</h1>

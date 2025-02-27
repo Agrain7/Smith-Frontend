@@ -1,3 +1,5 @@
+<!-- frontend/src/components/NavBar.vue -->
+
 <template>
   <nav class="top-nav-bar">
     <ul>

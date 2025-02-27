@@ -1,3 +1,5 @@
+<!-- frontend/src/components/Product.vue -->
+
 <template>
   <section class="product-section">
     <div class="product-container">

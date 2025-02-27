@@ -1,3 +1,5 @@
+<!-- frontend/src/components/Header.vue -->
+
 <template>
   <header class="header-container">
     <div class="header-top">

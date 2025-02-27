@@ -1,3 +1,5 @@
+<!-- frontend/src/views/Mypage.vue -->
+
 <template>
     <div class="mypage">
       <h1>완료된 거래 내역</h1>

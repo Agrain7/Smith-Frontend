@@ -1,3 +1,5 @@
+<!-- frontend/src/views/AdminPanel.vue -->
+
 <template>
   <div class="admin-panel">
     <h1>관리자 페이지</h1>
@@ -72,8 +74,8 @@
               <td>{{ estimate.email }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <a :href="estimate.fileUrl" target="_blank">
-                  {{ estimate.fileName }}
+                <a :href="estimate.fileUrl" :download="estimate.fileName">
+                 {{ estimate.fileName }}
                 </a>
               </td>
               <td>
