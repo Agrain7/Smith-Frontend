@@ -74,8 +74,8 @@
               <td>{{ estimate.email }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <a :href="estimate.fileUrl" :download="estimate.fileName">
-                 {{ estimate.fileName }}
+                <a :href="`/api/download/${extractFilename(estimate.fileUrl)}`" :download="estimate.fileName">
+                  {{ estimate.fileName }}
                 </a>
               </td>
               <td>
