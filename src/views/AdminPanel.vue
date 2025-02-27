@@ -21,7 +21,7 @@
     </div>
 
     <div class="tab-content">
-      <!-- 회원관리 탭 (기존 코드 유지) -->
+      <!-- 회원관리 탭 -->
       <div v-if="currentTab === 'members'">
         <table>
           <thead>
@@ -127,6 +127,10 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default {
   name: "AdminPanel",
   data() {
@@ -151,141 +155,178 @@ export default {
       return url.split('/').pop();
     },
     // 회원 관리 관련 메서드
-    fetchUsers() {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    async fetchUsers() {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      fetch(`${apiUrl}/api/users`, {
-        method: "GET",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.users) {
-            this.users = data.users;
-          } else {
-            console.error("회원 정보 불러오기 오류:", data);
-            alert("회원 정보를 불러오는데 실패했습니다.");
-          }
-        })
-        .catch(err => {
-          console.error("회원 정보 불러오기 오류:", err);
-          alert("회원 정보를 불러오는데 실패했습니다.");
+      try {
+        const res = await fetch(`${API_URL}/api/users`, {
+          method: "GET",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
         });
-    },
-    deleteUser(userId) {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      if (confirm("정말 삭제하시겠습니까?")) {
-        fetch(`${apiUrl}/api/users/${userId}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        })
-          .then(res => res.json())
-          .then(data => {
-            alert(data.message || "삭제되었습니다.");
-            this.fetchUsers();
-          })
-          .catch(err => {
-            console.error("회원 삭제 오류:", err);
-            alert("회원 삭제에 실패했습니다.");
+        const data = await res.json();
+        if (data.users) {
+          this.users = data.users;
+        } else {
+          console.error("회원 정보 불러오기 오류:", data);
+          Swal.fire({
+            icon: 'error',
+            title: '오류',
+            text: '회원 정보를 불러오는데 실패했습니다.'
           });
+        }
+      } catch (err) {
+        console.error("회원 정보 불러오기 오류:", err);
+        Swal.fire({
+          icon: 'error',
+          title: '오류',
+          text: '회원 정보를 불러오는데 실패했습니다.'
+        });
+      }
+    },
+    async deleteUser(userId) {
+      const result = await Swal.fire({
+        title: '정말 삭제하시겠습니까?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '삭제',
+        cancelButtonText: '취소'
+      });
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`${API_URL}/api/users/${userId}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+          });
+          const data = await res.json();
+          await Swal.fire({
+            icon: 'success',
+            title: '삭제 완료',
+            text: data.message || '삭제되었습니다.'
+          });
+          this.fetchUsers();
+        } catch (err) {
+          console.error("회원 삭제 오류:", err);
+          Swal.fire({
+            icon: 'error',
+            title: '오류',
+            text: '회원 삭제에 실패했습니다.'
+          });
+        }
       }
     },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString();
     },
     // 견적 요청 관련 메서드
-    fetchEstimates() {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    async fetchEstimates() {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      fetch(`${apiUrl}/api/estimate-request`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            this.estimates = data.estimates;
-          } else {
-            console.error("견적 요청 데이터 불러오기 오류:", data);
-            alert("견적 요청 데이터를 불러오는데 실패했습니다.");
-          }
-        })
-        .catch(err => {
-          console.error("견적 요청 데이터 불러오기 오류:", err);
-          alert("견적 요청 데이터를 불러오는데 실패했습니다.");
+      try {
+        const res = await fetch(`${API_URL}/api/estimate-request`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
         });
+        const data = await res.json();
+        if (data.success) {
+          this.estimates = data.estimates;
+        } else {
+          console.error("견적 요청 데이터 불러오기 오류:", data);
+          Swal.fire({
+            icon: 'error',
+            title: '오류',
+            text: '견적 요청 데이터를 불러오는데 실패했습니다.'
+          });
+        }
+      } catch (err) {
+        console.error("견적 요청 데이터 불러오기 오류:", err);
+        Swal.fire({
+          icon: 'error',
+          title: '오류',
+          text: '견적 요청 데이터를 불러오는데 실패했습니다.'
+        });
+      }
     },
     sendEstimate(estimate) {
-      // 이메일 전송 기능 예시
-      const templateParams = {
-        username: estimate.username,
-        name: estimate.name,
-        phone: estimate.phone,
-        projectName: estimate.projectName,
-        email: estimate.email,
-        file_content: estimate.fileContent, // 필요시 사용
-        filename: estimate.fileName
-      };
-      emailjs.send('service_ut6rmkh', 'template_f7rf82t', templateParams, 'umd5YAQiBuxttvCy2')
-        .then(
-          (response) => {
-            alert('견적서 전송 성공');
-          },
-          (error) => {
-            console.error('견적서 전송 실패:', error);
-            alert('견적서 전송에 실패하였습니다.');
-          }
-        );
+      // 견적서 전송 기능은 UI 개선 단계로 현재 미구현입니다.
+      Swal.fire({
+        icon: 'info',
+        title: '알림',
+        text: '견적서 전송 기능은 현재 미구현 상태입니다.'
+      });
     },
-    completeProject(estimate) {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      fetch(`${apiUrl}/api/estimate-request/${estimate._id}/complete`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-      })
-        .then(res => res.json())
-        .then(data => {
+    async completeProject(estimate) {
+      const result = await Swal.fire({
+        title: '프로젝트 완료 처리',
+        text: '해당 프로젝트를 완료 처리하시겠습니까?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '완료 처리',
+        cancelButtonText: '취소'
+      });
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`${API_URL}/api/estimate-request/${estimate._id}/complete`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+          });
+          const data = await res.json();
           if (data.success) {
-            alert("프로젝트가 완료 처리되었습니다.");
+            await Swal.fire({
+              icon: 'success',
+              title: '완료 처리',
+              text: '프로젝트가 완료 처리되었습니다.'
+            });
             this.fetchEstimates();
           } else {
-            alert(data.message || "프로젝트 완료 처리에 실패했습니다.");
+            await Swal.fire({
+              icon: 'error',
+              title: '오류',
+              text: data.message || '프로젝트 완료 처리에 실패했습니다.'
+            });
           }
-        })
-        .catch(err => {
+        } catch (err) {
           console.error("프로젝트 완료 처리 오류:", err);
-          alert("프로젝트 완료 처리 중 오류 발생");
-        });
-    },
-    updateEstimateFile(estimate) {
-      alert(`사용자 ${estimate.username}의 견적서 파일을 업데이트합니다.`);
-      // 실제 파일 업데이트 로직 추가 필요
-    },
-    viewFile(estimate) {
-      window.open(estimate.fileUrl, '_blank');
-    },
-    deleteEstimate(estimateId) {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      if (confirm("정말 삭제하시겠습니까?")) {
-        fetch(`${apiUrl}/api/estimate-request/${estimateId}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        })
-          .then(res => res.json())
-          .then(data => {
-            alert(data.message || "삭제되었습니다.");
-            this.fetchEstimates();
-          })
-          .catch(err => {
-            console.error("견적 삭제 오류:", err);
-            alert("견적 삭제에 실패했습니다.");
+          Swal.fire({
+            icon: 'error',
+            title: '오류',
+            text: '프로젝트 완료 처리 중 오류 발생'
           });
+        }
+      }
+    },
+    async deleteEstimate(estimateId) {
+      const result = await Swal.fire({
+        title: '정말 삭제하시겠습니까?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '삭제',
+        cancelButtonText: '취소'
+      });
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`${API_URL}/api/estimate-request/${estimateId}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+          });
+          const data = await res.json();
+          await Swal.fire({
+            icon: 'success',
+            title: '삭제 완료',
+            text: data.message || '삭제되었습니다.'
+          });
+          this.fetchEstimates();
+        } catch (err) {
+          console.error("견적 삭제 오류:", err);
+          Swal.fire({
+            icon: 'error',
+            title: '오류',
+            text: '견적 삭제에 실패했습니다.'
+          });
+        }
       }
     }
   },
@@ -317,11 +358,12 @@ export default {
   font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.3s;
 }
 .tabs button.active {
   background-color: #007bff;
   color: #fff;
+  transform: scale(1.05);
 }
 table {
   width: 100%;
