@@ -1,5 +1,3 @@
-<!-- frontend/src/views/AdminPanel.vue -->
-
 <template>
   <div class="admin-panel">
     <h1>관리자 페이지</h1>
@@ -139,16 +137,19 @@ export default {
     };
   },
   computed: {
-    // pendingEstimates: 아직 완료 처리되지 않은 견적 요청
+    // 아직 완료 처리되지 않은 견적 요청
     pendingEstimates() {
       return this.estimates.filter(estimate => !estimate.completed);
     },
-    // completedEstimates: 완료된 견적 요청
+    // 완료된 견적 요청
     completedEstimates() {
       return this.estimates.filter(estimate => estimate.completed);
     }
   },
   methods: {
+    extractFilename(url) {
+      return url.split('/').pop();
+    },
     // 회원 관리 관련 메서드
     fetchUsers() {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -195,7 +196,6 @@ export default {
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString();
     },
-
     // 견적 요청 관련 메서드
     fetchEstimates() {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -229,7 +229,7 @@ export default {
         phone: estimate.phone,
         projectName: estimate.projectName,
         email: estimate.email,
-        file_content: estimate.fileContent, // 만약 fileContent를 사용하지 않는다면 생략 가능
+        file_content: estimate.fileContent, // 필요시 사용
         filename: estimate.fileName
       };
       emailjs.send('service_ut6rmkh', 'template_f7rf82t', templateParams, 'umd5YAQiBuxttvCy2')
