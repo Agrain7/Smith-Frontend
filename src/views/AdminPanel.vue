@@ -72,8 +72,9 @@
               <td>{{ estimate.email }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <a :href="`/api/download/${extractFilename(estimate.fileUrl)}`" :download="estimate.fileName">
-                  {{ estimate.fileName }}
+                <!-- S3에 저장된 인코딩된 Key는 그대로 사용하고, 사용자에게는 디코딩한 이름을 표시 -->
+                <a :href="`/api/download/${getFileKey(estimate.fileUrl)}`" :download="displayFileName(estimate.fileUrl)">
+                  {{ displayFileName(estimate.fileUrl) }}
                 </a>
               </td>
               <td>
@@ -112,7 +113,7 @@
               <td>{{ estimate.projectName }}</td>
               <td>
                 <a :href="estimate.fileUrl" target="_blank">
-                  {{ estimate.fileName }}
+                  {{ displayFileName(estimate.fileUrl) }}
                 </a>
               </td>
               <td>
@@ -141,22 +142,28 @@ export default {
     };
   },
   computed: {
-    // 아직 완료 처리되지 않은 견적 요청
     pendingEstimates() {
       return this.estimates.filter(estimate => !estimate.completed);
     },
-    // 완료된 견적 요청
     completedEstimates() {
       return this.estimates.filter(estimate => estimate.completed);
     }
   },
   methods: {
-    extractFilename(url) {
-    // URL의 마지막 부분을 추출한 후 디코딩
-    const encodedFileName = url.split('/').pop();
-    return decodeURIComponent(encodedFileName);
-  },
-    // 회원 관리 관련 메서드
+    // S3에 저장된 파일 Key (인코딩된 값)는 그대로 사용
+    getFileKey(url) {
+      return url.split('/').pop();
+    },
+    // 사용자에게 표시할 파일명은 decodeURIComponent로 복원
+    displayFileName(url) {
+      const encodedFileName = url.split('/').pop();
+      try {
+        return decodeURIComponent(encodedFileName);
+      } catch (err) {
+        console.error("파일명 디코딩 오류:", err);
+        return encodedFileName;
+      }
+    },
     async fetchUsers() {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       try {
@@ -221,7 +228,6 @@ export default {
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString();
     },
-    // 견적 요청 관련 메서드
     async fetchEstimates() {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       try {
@@ -253,7 +259,6 @@ export default {
       }
     },
     sendEstimate(estimate) {
-      // 견적서 전송 기능은 UI 개선 단계로 현재 미구현입니다.
       Swal.fire({
         icon: 'info',
         title: '알림',
