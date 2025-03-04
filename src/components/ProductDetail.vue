@@ -81,12 +81,12 @@
 
 <script>
 import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
-import banner1 from '@/assets/banner1.jpg'
-import banner2 from '@/assets/banner2.jpg'
-import banner3 from '@/assets/banner3.jpg'
-import banner4 from '@/assets/banner4.jpg'
-import banner5 from '@/assets/banner5.jpg'
-import banner6 from '@/assets/banner6.jpg'
+import product1 from '@/assets/product1.jpg'
+import product2 from '@/assets/product2.jpg'
+import product3 from '@/assets/product3.jpg'
+import product4 from '@/assets/product4.jpg'
+import product5 from '@/assets/product5.jpg'
+import product6 from '@/assets/product6.jpg'
 
 export default {
   name: "ProductDetail",
@@ -97,32 +97,32 @@ export default {
     return {
       products: {
         '현장용소부재': {
-          image: banner1,
+          image: product1,
           name: '현장용소부재',
           description: '현장용소부재에 대한 상세 설명입니다.',
         },
         '공장용소부재': {
-          image: banner2,
+          image: product2,
           name: '공장용소부재',
           description: '공장용소부재에 대한 상세 설명입니다.',
         },
         '철판': {
-          image: banner3,
+          image: product3,
           name: '철판',
           description: '철판에 대한 상세 설명입니다.',
         },
         '브라켓': {
-          image: banner4,
+          image: product4,
           name: '브라켓',
           description: '브라켓에 대한 상세 설명입니다.',
         },
         '볼트': {
-          image: banner5,
+          image: product5,
           name: '볼트',
           description: '볼트에 대한 상세 설명입니다.',
         },
         '야': {
-          image: banner6,
+          image: product6,
           name: '야',
           description: '야 제품에 대한 상세 설명입니다.',
         },
@@ -133,7 +133,6 @@ export default {
       detailStatus: '세부견적 확인',
       isDetailDisabled: true,
       showEstimateModal: false,
-      // 기타 필요한 상태들...
     }
   },
   computed: {
