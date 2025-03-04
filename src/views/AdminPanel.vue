@@ -152,8 +152,10 @@ export default {
   },
   methods: {
     extractFilename(url) {
-      return url.split('/').pop();
-    },
+    // URL의 마지막 부분을 추출한 후 디코딩
+    const encodedFileName = url.split('/').pop();
+    return decodeURIComponent(encodedFileName);
+  },
     // 회원 관리 관련 메서드
     async fetchUsers() {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
