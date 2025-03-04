@@ -72,7 +72,7 @@
               <td>{{ estimate.email }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <!-- S3에 저장된 인코딩된 Key는 그대로 사용하고, 사용자에게는 디코딩한 이름을 표시 -->
+                <!-- 다운로드 링크에 S3에 저장된 인코딩된 Key 사용 -->
                 <a :href="`/api/download/${getFileKey(estimate.fileUrl)}`" :download="displayFileName(estimate.fileUrl)">
                   {{ displayFileName(estimate.fileUrl) }}
                 </a>
@@ -150,11 +150,11 @@ export default {
     }
   },
   methods: {
-    // S3에 저장된 파일 Key (인코딩된 값)는 그대로 사용
+    // S3에 저장된 인코딩된 파일 Key(마지막 부분)는 그대로 반환
     getFileKey(url) {
       return url.split('/').pop();
     },
-    // 사용자에게 표시할 파일명은 decodeURIComponent로 복원
+    // 사용자에게 표시할 파일명은 디코딩하여 반환
     displayFileName(url) {
       const encodedFileName = url.split('/').pop();
       try {
