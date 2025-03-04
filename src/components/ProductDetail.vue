@@ -1,5 +1,3 @@
-<!-- frontend/src/components/ProductDetail.vue -->
-
 <template>
   <div class="product-detail">
     <!-- 왼쪽 영역: 제품 이미지 -->
@@ -53,7 +51,10 @@
           @click="handleEstimateRequest">
           세부단가 견적요청
         </button>
-        <button class="help-button" @click="showHelp">?</button>
+        <!-- ? 버튼은 로그인 상태가 아닐 때 비활성화, 로그인 상태이면 클릭 시 Estimate 페이지로 이동 -->
+        <button class="help-button" 
+                @click="showHelp" 
+                :disabled="!isLoggedIn">?</button>
       </div>
 
       <!-- 진행상황 텍스트 (오른쪽 정렬) -->
@@ -79,49 +80,49 @@
 </template>
 
 <script>
-import productImage1 from '@/assets/product1.webp';
-import productImage2 from '@/assets/product2.webp';
-import productImage3 from '@/assets/product3.webp';
-import productImage4 from '@/assets/product4.webp';
-import productImage5 from '@/assets/product5.webp';
-import productImage6 from '@/assets/product6.webp';
-import EstimateRequestModal from '@/components/EstimateRequestModal.vue';
+import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
+import banner1 from '@/assets/banner1.jpg'
+import banner2 from '@/assets/banner2.jpg'
+import banner3 from '@/assets/banner3.jpg'
+import banner4 from '@/assets/banner4.jpg'
+import banner5 from '@/assets/banner5.jpg'
+import banner6 from '@/assets/banner6.jpg'
 
 export default {
-  name: 'ProductDetail',
+  name: "ProductDetail",
   components: {
-    EstimateRequestModal,
+    EstimateRequestModal
   },
   data() {
     return {
       products: {
         '현장용소부재': {
-          image: productImage1,
+          image: banner1,
           name: '현장용소부재',
           description: '현장용소부재에 대한 상세 설명입니다.',
         },
         '공장용소부재': {
-          image: productImage2,
+          image: banner2,
           name: '공장용소부재',
           description: '공장용소부재에 대한 상세 설명입니다.',
         },
         '철판': {
-          image: productImage3,
+          image: banner3,
           name: '철판',
           description: '철판에 대한 상세 설명입니다.',
         },
         '브라켓': {
-          image: productImage4,
+          image: banner4,
           name: '브라켓',
           description: '브라켓에 대한 상세 설명입니다.',
         },
         '볼트': {
-          image: productImage5,
+          image: banner5,
           name: '볼트',
           description: '볼트에 대한 상세 설명입니다.',
         },
         '야': {
-          image: productImage6,
+          image: banner6,
           name: '야',
           description: '야 제품에 대한 상세 설명입니다.',
         },
@@ -131,8 +132,9 @@ export default {
       uploadStatus: '견적파일 미제출',
       detailStatus: '세부견적 확인',
       isDetailDisabled: true,
-      showEstimateModal: false, // 모달 표시 여부
-    };
+      showEstimateModal: false,
+      // 기타 필요한 상태들...
+    }
   },
   computed: {
     product() {
@@ -155,19 +157,18 @@ export default {
       if (!token) return {};
       try {
         const payload = token.split('.')[1];
-        // 한글 깨짐 문제를 방지하기 위해 decodeURIComponent(escape(...)) 사용 가능
         const decoded = JSON.parse(decodeURIComponent(escape(window.atob(payload))));
         return {
           username: decoded.username || '',
-          name: decoded.name || '',  // 수정: decoded.name 사용
-          phone: decoded.phone || '',  // decoded.phone 사용 (토큰에 포함되어 있어야 함)
-          email: decoded.email || ''   // 이메일 정보는 별도로 저장하거나 빈 문자열 처리
+          name: decoded.name || '',
+          phone: decoded.phone || '',
+          email: decoded.email || ''
         };
       } catch (error) {
         console.error("토큰 파싱 오류:", error);
         return {};
       }
-    },
+    }
   },
   methods: {
     handleEstimateRequest() {
@@ -177,6 +178,14 @@ export default {
         return;
       }
       this.showEstimateModal = true;
+    },
+    // ? 버튼 클릭 시 로그인 여부 확인 후 Estimate 페이지로 이동
+    showHelp() {
+      if (!this.isLoggedIn) {
+        alert("로그인 후 이용 가능합니다.");
+        return;
+      }
+      this.$router.push('/estimate');
     },
     onDetailEstimateClick() {
       // 견적 요청 상태 확인 API 호출 (예시)
@@ -205,12 +214,11 @@ export default {
       const shippingCost = 3000; // 예시 배송비
       const url = `/purchase?price=${totalPrice}&shipping=${shippingCost}`;
       window.open(url, '_blank', 'width=800,height=800');
-    },
-    showHelp() {
-      alert('세부 단가 견적 요청에 대한 자세한 안내를 제공합니다.');
-      this.isDetailDisabled = false;
-    },
+    }
   },
+  mounted() {
+    // 필요 시 초기 데이터 fetch
+  }
 };
 </script>
 
@@ -366,23 +374,6 @@ export default {
 .help-button:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-}
-.detail-estimate-button {
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  padding: 8px 12px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-.detail-estimate-button:hover {
-  background-color: #e2e6ea;
-}
-.detail-estimate-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-  background-color: #f0f0f0;
 }
 .progress-status {
   text-align: right;

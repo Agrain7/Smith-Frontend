@@ -6,6 +6,7 @@ import Signup from '@/views/Signup.vue'
 import Product from '@/components/Product.vue'
 import Purchase from '@/components/Purchase.vue'
 import ProductDetail from '@/components/ProductDetail.vue'
+import Estimate from '@/components/Estimate.vue';
 import Basket from '@/views/Basket.vue'
 import Mypage from '@/views/Mypage.vue'
 import AdminPanel from '@/views/AdminPanel.vue'
@@ -51,6 +52,12 @@ const routes = [
     name: 'Mypage',
     component: Mypage,
     meta: { hideBanner: true }
+  },
+  {
+    path: '/estimate',
+    name: 'Estimate',
+    component: Estimate,
+    meta: { minimalLayout: true } 
   },
   { 
     path: '/admin', 
