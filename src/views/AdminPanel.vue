@@ -73,8 +73,8 @@
               <td>{{ estimate.projectName }}</td>
               <td>
                 <!-- 다운로드 링크에 S3에 저장된 인코딩된 Key 사용 -->
-                <a :href="`/api/download/${getFileKey(estimate.fileUrl)}`" :download="displayFileName(estimate.fileUrl)">
-                  {{ displayFileName(estimate.fileUrl) }}
+                <a :href="`/api/download/${getFileKey(estimate.fileUrl)}`" :download="estimate.fileName">
+                {{ estimate.fileName }}
                 </a>
               </td>
               <td>
