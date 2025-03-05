@@ -374,32 +374,32 @@ export default {
     },
     // 오늘의 가격 관리 탭 저장: 백엔드 PUT /api/price-config 호출
     async savePriceConfig() {
-      try {
-        const res = await fetch(`${API_URL}/api/price-config`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(this.localPriceConfig)
-        });
-        const data = await res.json();
-        if (data.success) {
-          await swalWithCenter.fire({
-            icon: 'success',
-            title: '저장 완료',
-            text: '오늘의 가격 정보가 업데이트되었습니다.'
-          });
-          // 가격 업데이트 후, 스토어의 값도 최신값으로 반영 (원하는 경우)
-          this.$store.commit('updatePriceConfig', this.localPriceConfig);
-        } else {
-          await swalWithCenter.fire({
-            icon: 'error',
-            title: '오류',
-            text: '가격 설정 업데이트에 실패했습니다.'
-          });
-        }
-      } catch (error) {
-        console.error("가격 설정 업데이트 오류:", error);
-      }
-    },
+  try {
+    const res = await fetch(`${API_URL}/api/price-config`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(this.localPriceConfig) // localPriceConfig 값 전송
+    });
+    const data = await res.json();
+    if (data.success) {
+      await swalWithCenter.fire({
+        icon: 'success',
+        title: '저장 완료',
+        text: '오늘의 가격 정보가 업데이트되었습니다.'
+      });
+      this.$store.commit('updatePriceConfig', this.localPriceConfig);
+    } else {
+      await swalWithCenter.fire({
+        icon: 'error',
+        title: '오류',
+        text: '가격 설정 업데이트에 실패했습니다.'
+      });
+    }
+  } catch (error) {
+    console.error("가격 설정 업데이트 오류:", error);
+  }
+}
+,
     // 관리자페이지 진입 시, 백엔드에서 현재 가격 설정 불러오기
     async fetchPriceConfig() {
       try {
