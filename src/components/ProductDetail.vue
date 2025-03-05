@@ -52,7 +52,7 @@
           @click="handleEstimateRequest">
           세부단가 견적요청
         </button>
-        <!-- ? 버튼은 로그인 상태가 아닐 때 비활성화, 로그인 상태이면 클릭 시 Estimate 페이지로 이동 -->
+        <!-- ? 버튼: 로그인 상태가 아닐 때 비활성화, 로그인 상태이면 클릭 시 Estimate 페이지로 이동 -->
         <button class="help-button" 
                 @click="showHelp" 
                 :disabled="!isLoggedIn">?</button>
@@ -60,7 +60,6 @@
 
       <!-- 진행상황 텍스트 (오른쪽 정렬) -->
       <div class="progress-status">
-        <!-- uploadStatus를 사용하여 진행 상태 표시 -->
         <p>진행상황: {{ uploadStatus }}</p>
         <button class="detail-estimate-button" @click="onDetailEstimateClick" :disabled="isDetailDisabled">
           {{ detailStatus }}
@@ -216,10 +215,37 @@ export default {
       const shippingCost = 3000; // 예시 배송비
       const url = `/purchase?price=${totalPrice}&shipping=${shippingCost}`;
       window.open(url, '_blank', 'width=800,height=800');
+    },
+    // 사용자의 토큰(username)과 현재 제품의 이름을 기반으로 견적 요청 정보를 조회하여 uploadStatus 업데이트
+    checkEstimateStatus() {
+      if (!this.isLoggedIn) return;
+      const username = this.currentUserData.username;
+      // 현재 제품의 이름을 프로젝트명으로 가정 (혹은 다른 고유 값을 사용)
+      const projectName = this.product.name;
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      fetch(`${apiUrl}/api/estimate-request?username=${encodeURIComponent(username)}&projectName=${encodeURIComponent(projectName)}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.estimates && data.estimates.length > 0) {
+            // 해당 조건에 맞는 견적 요청이 있으면 fileSubmitted에 따라 상태 업데이트
+            const estimate = data.estimates[0];
+            this.uploadStatus = estimate.fileSubmitted ? '견적파일 제출완료' : '견적파일 미제출';
+          } else {
+            this.uploadStatus = '견적파일 미제출';
+          }
+        })
+        .catch(error => {
+          console.error("견적 요청 상태 확인 오류:", error);
+          this.uploadStatus = '견적파일 미제출';
+        });
     }
   },
   mounted() {
-    // 필요 시 초기 데이터 fetch
+    // 페이지가 로드되면 견적 요청 상태를 확인합니다.
+    this.checkEstimateStatus();
   }
 };
 </script>
