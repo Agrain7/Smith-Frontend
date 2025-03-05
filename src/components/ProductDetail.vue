@@ -60,7 +60,7 @@
 
       <!-- 진행상황 텍스트 (오른쪽 정렬) -->
       <div class="progress-status">
-        <p>진행상황: {{ uploadStatus }}</p>
+        <p>진행상황: {{ estimate.fileSubmitted ? '견적파일 제출완료' : '견적파일 미제출' }}</p>
         <button class="detail-estimate-button" @click="onDetailEstimateClick" :disabled="isDetailDisabled">
           {{ detailStatus }}
         </button>
