@@ -378,7 +378,7 @@ export default {
         const res = await fetch(`${API_URL}/api/price-config`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(this.priceConfig)
+          body: JSON.stringify(this.localPriceConfig)
         });
         const data = await res.json();
         if (data.success) {
@@ -388,7 +388,7 @@ export default {
             text: '오늘의 가격 정보가 업데이트되었습니다.'
           });
           // 가격 업데이트 후, 스토어의 값도 최신값으로 반영 (원하는 경우)
-          this.$store.commit('updatePriceConfig', this.priceConfig);
+          this.$store.commit('updatePriceConfig', this.localPriceConfig);
         } else {
           await swalWithCenter.fire({
             icon: 'error',
