@@ -1,3 +1,5 @@
+<!-- frontend/src/components/Estimate.vue -->
+
 <template>
     <div>
       <!-- 액션 버튼 -->

@@ -123,9 +123,10 @@
 </template>
 
 <script>
+// SweetAlert2와 CSS 파일 임포트 (SweetAlert2 CSS를 적용하기 위해 추가)
 import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
-// 전역 SweetAlert2 믹스인: 모든 알림이 화면 중앙에 표시되도록 설정
 const swalWithCenter = Swal.mixin({
   position: 'center'
 });
@@ -157,7 +158,7 @@ export default {
           method: "GET",
           headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}` // 토큰 포함
           },
         });
         const data = await res.json();
@@ -181,6 +182,7 @@ export default {
       }
     },
     async deleteUser(userId) {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const result = await swalWithCenter.fire({
         title: '정말 삭제하시겠습니까?',
         icon: 'warning',
@@ -192,7 +194,10 @@ export default {
         try {
           const res = await fetch(`${API_URL}/api/users/${userId}`, {
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`  // 인증 토큰 추가
+            },
           });
           const data = await res.json();
           await swalWithCenter.fire({
