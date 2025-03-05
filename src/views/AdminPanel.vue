@@ -70,7 +70,7 @@
               <td>{{ estimate.phone }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <!-- 다운로드 링크 클릭 시 downloadFile 메서드 호출 -->
+                <!-- 다운로드 링크: 저장명 묻는 기능 제거, 바로 파일명 사용 -->
                 <a href="#" @click.prevent="downloadFile(estimate)">파일 다운로드</a>
               </td>
               <td>
@@ -106,7 +106,6 @@
               <td>{{ estimate.phone }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <!-- 다운로드 링크 클릭 시 downloadFile 메서드 호출 -->
                 <a href="#" @click.prevent="downloadFile(estimate)">파일 다운로드</a>
               </td>
               <td>
@@ -121,7 +120,6 @@
 </template>
 
 <script>
-// SweetAlert2와 CSS 파일 임포트 (다운로드 후 파일명 입력 prompt 등에도 사용)
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -156,7 +154,7 @@ export default {
           method: "GET",
           headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`  // 인증 토큰 포함
+            "Authorization": `Bearer ${token}`
           },
         });
         const data = await res.json();
@@ -194,7 +192,7 @@ export default {
             method: "DELETE",
             headers: { 
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`  // 인증 토큰 추가
+              "Authorization": `Bearer ${token}`
             },
           });
           const data = await res.json();
@@ -325,17 +323,11 @@ export default {
         }
       }
     },
-    // 다운로드 링크 클릭 시 호출되는 메서드
+    // 다운로드 시 파일명을 묻지 않고 서버에서 반환한 파일명 그대로 사용
     downloadFile(estimate) {
-      // 기본 파일명은 프로젝트명으로 설정
-      const defaultName = estimate.projectName || '';
-      const fileName = window.prompt('저장할 파일명을 입력하세요', defaultName);
-      if (!fileName) return; // 취소하거나 입력값이 없으면 중단
-
-      // 임시 a 엘리먼트를 생성하여 다운로드 처리
       const link = document.createElement('a');
       link.href = estimate.fileUrl;
-      link.download = fileName;
+      link.download = estimate.fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
