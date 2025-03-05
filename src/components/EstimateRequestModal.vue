@@ -93,8 +93,6 @@ export default {
         });
         const data = uploadResponse.data;
         if (data.success) {
-          alert("파일 업로드 성공!");
-          // 파일 업로드 성공 후, 백엔드에 견적 요청 정보를 저장하는 POST 요청
           const payload = {
             // 이제 이메일 필드는 전송하지 않습니다.
             username: this.userData.username,
