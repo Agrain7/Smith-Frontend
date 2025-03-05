@@ -1,5 +1,3 @@
-<!-- frontend/src/components/EstimateRequestModal.vue -->
-
 <template>
   <div class="modal-overlay" @click.self="close">
     <div class="modal-content">
@@ -9,32 +7,20 @@
       </div>
       <h2>견적 요청 제출</h2>
       <form @submit.prevent="submitEstimate">
-        <!-- 로그인한 사용자 정보 (수정 가능) -->
-        <div class="form-group">
-          <label>아이디:</label>
-          <input type="text" v-model="form.username" readonly />
-        </div>
-        <div class="form-group">
-          <label>이름:</label>
-          <input type="text" v-model="form.name" />
-        </div>
-        <div class="form-group">
-          <label>전화번호:</label>
-          <input type="text" v-model="form.phone" />
-        </div>
-        <!-- 프로젝트명 및 이메일 입력 -->
+        <!-- 프로젝트명 입력 -->
         <div class="form-group">
           <label>프로젝트명:</label>
           <input type="text" v-model="form.projectName" placeholder="프로젝트명을 입력하세요" required />
-        </div>
-        <div class="form-group">
-          <label>이메일 주소:</label>
-          <input type="email" v-model="form.email" placeholder="이메일을 입력하세요" required />
         </div>
         <!-- 파일 업로드 (모든 파일 허용) -->
         <div class="form-group">
           <label>견적요청 파일:</label>
           <input type="file" ref="fileInput" @change="handleFileChange" required />
+        </div>
+        <!-- 업로드 진행률 표시 -->
+        <div class="progress" v-if="uploadProgress > 0">
+          업로드 진행률: {{ uploadProgress }}%
+          <progress :value="uploadProgress" max="100"></progress>
         </div>
         <!-- 버튼 그룹 -->
         <div class="button-group">
@@ -47,6 +33,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'EstimateRequestModal',
   props: {
@@ -58,13 +46,10 @@ export default {
   data() {
     return {
       form: {
-        username: this.userData.username || '',
-        name: this.userData.name || '',
-        phone: this.userData.phone || '',
         projectName: '',
-        email: this.userData.email || '',
         file: null
-      }
+      },
+      uploadProgress: 0  // 업로드 진행률 (%)
     };
   },
   computed: {
@@ -86,67 +71,56 @@ export default {
         this.$refs.fileInput.value = null;
       }
     },
-    submitEstimate() {
+    async submitEstimate() {
       if (!this.form.file) {
         alert('파일을 선택하세요.');
         return;
       }
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      // FormData 객체 생성하여 파일 및 기타 폼 데이터를 함께 전송
       const formData = new FormData();
       formData.append('estimateFile', this.form.file);
-      formData.append('username', this.form.username);
-      formData.append('name', this.form.name);
-      formData.append('phone', this.form.phone);
-      formData.append('email', this.form.email);
       formData.append('projectName', this.form.projectName);
       formData.append('productType', this.productType);
-      
-      fetch(`${apiUrl}/api/upload-estimate`, {
-        method: 'POST',
-        body: formData
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            alert("파일 업로드 성공!");
-            // 파일 업로드가 성공하면, 백엔드에 견적 요청 정보를 저장하는 POST 요청을 추가합니다.
-            const payload = {
-              username: this.form.username,
-              name: this.form.name,
-              phone: this.form.phone,
-              email: this.form.email,
-              projectName: this.form.projectName,
-              productType: this.productType,
-              fileUrl: data.fileUrl,    // 업로드 응답으로 받은 파일 URL
-              fileName: data.fileName   // 업로드 응답으로 받은 원본 파일명
-            };
-            fetch(`${apiUrl}/api/estimate-request`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            })
-              .then(res2 => res2.json())
-              .then(result => {
-                if (result.success) {
-                  alert("견적 요청이 제출되었습니다.");
-                  this.close();
-                } else {
-                  alert(result.message || "견적 요청 제출에 실패했습니다.");
-                }
-              })
-              .catch(err => {
-                console.error("견적 요청 제출 오류:", err);
-                alert("견적 요청 제출 중 오류 발생");
-              });
-          } else {
-            alert(data.message || "파일 업로드에 실패했습니다.");
+
+      try {
+        // Axios를 사용하여 파일 업로드 진행률 추적
+        const uploadResponse = await axios.post(`${apiUrl}/api/upload-estimate`, formData, {
+          onUploadProgress: progressEvent => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            this.uploadProgress = percentCompleted;
           }
-        })
-        .catch(err => {
-          console.error("파일 업로드 오류:", err);
-          alert("파일 업로드 중 오류 발생");
         });
+        const data = uploadResponse.data;
+        if (data.success) {
+          alert("파일 업로드 성공!");
+          // 파일 업로드 성공 후, 백엔드에 견적 요청 정보를 저장하는 POST 요청
+          const payload = {
+            // 이제 이메일 필드는 전송하지 않습니다.
+            username: this.userData.username,
+            name: this.userData.name,
+            phone: this.userData.phone,
+            projectName: this.form.projectName,
+            productType: this.productType,
+            fileUrl: data.fileUrl,    // 업로드 응답으로 받은 파일 URL
+            fileName: data.fileName   // 업로드 응답으로 받은 원본 파일명
+          };
+          const estimateRes = await axios.post(`${apiUrl}/api/estimate-request`, payload, {
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const estimateData = estimateRes.data;
+          if (estimateData.success) {
+            alert("견적 요청이 제출되었습니다.");
+            this.close();
+          } else {
+            alert(estimateData.message || "견적 요청 제출에 실패했습니다.");
+          }
+        } else {
+          alert(data.message || "파일 업로드에 실패했습니다.");
+        }
+      } catch (err) {
+        console.error("파일 업로드 오류:", err);
+        alert("파일 업로드 중 오류 발생");
+      }
     }
   }
 };
@@ -176,6 +150,9 @@ export default {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 10px;
+}
+h2 {
+  margin-bottom: 20px;
 }
 .form-group {
   margin-bottom: 15px;
@@ -207,5 +184,12 @@ export default {
 }
 .button-group button[type="button"] {
   background-color: #ccc;
+}
+.progress {
+  margin-bottom: 15px;
+}
+progress {
+  width: 100%;
+  height: 20px;
 }
 </style>

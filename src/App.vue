@@ -1,3 +1,5 @@
+<!-- frontend/src/App.vue -->
+
 <template>
   <div id="app">
     <!-- minimalLayout이 true인 경우(구매창)에는 NavBar와 Header를 숨깁니다 -->

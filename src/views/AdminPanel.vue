@@ -47,7 +47,7 @@
         </table>
       </div>
 
-      <!-- 프로젝트 및 견적서 전송 탭 -->
+      <!-- 프로젝트 및 견적서 전송 탭 (이메일 칸 제거) -->
       <div v-if="currentTab === 'estimates'">
         <table>
           <thead>
@@ -56,7 +56,6 @@
               <th>아이디</th>
               <th>이름</th>
               <th>전화번호</th>
-              <th>이메일주소</th>
               <th>프로젝트명</th>
               <th>견적요청 파일</th>
               <th>견적서 전송하기</th>
@@ -69,12 +68,10 @@
               <td>{{ estimate.username }}</td>
               <td>{{ estimate.name }}</td>
               <td>{{ estimate.phone }}</td>
-              <td>{{ estimate.email }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <!-- 다운로드 링크에 S3에 저장된 인코딩된 Key 사용 -->
-                <a :href="`/api/download/${getFileKey(estimate.fileUrl)}`" :download="estimate.fileName">
-                {{ estimate.fileName }}
+                <a :href="estimate.fileUrl" target="_blank" :download="estimate.fileName">
+                  파일 다운로드
                 </a>
               </td>
               <td>
@@ -88,7 +85,7 @@
         </table>
       </div>
 
-      <!-- 완료 프로젝트 탭 -->
+      <!-- 완료 프로젝트 탭 (이메일 칸 제거) -->
       <div v-if="currentTab === 'completed'">
         <table>
           <thead>
@@ -97,7 +94,6 @@
               <th>아이디</th>
               <th>이름</th>
               <th>전화번호</th>
-              <th>이메일주소</th>
               <th>프로젝트명</th>
               <th>견적요청 파일</th>
               <th>삭제</th>
@@ -109,11 +105,10 @@
               <td>{{ estimate.username }}</td>
               <td>{{ estimate.name }}</td>
               <td>{{ estimate.phone }}</td>
-              <td>{{ estimate.email }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <a :href="estimate.fileUrl" target="_blank">
-                  {{ displayFileName(estimate.fileUrl) }}
+                <a :href="estimate.fileUrl" target="_blank" :download="estimate.fileName">
+                  파일 다운로드
                 </a>
               </td>
               <td>
@@ -129,6 +124,11 @@
 
 <script>
 import Swal from 'sweetalert2';
+
+// 전역 SweetAlert2 믹스인: 모든 알림이 화면 중앙에 표시되도록 설정
+const swalWithCenter = Swal.mixin({
+  position: 'center'
+});
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -150,20 +150,6 @@ export default {
     }
   },
   methods: {
-    // S3에 저장된 인코딩된 파일 Key(마지막 부분)는 그대로 반환
-    getFileKey(url) {
-      return url.split('/').pop();
-    },
-    // 사용자에게 표시할 파일명은 디코딩하여 반환
-    displayFileName(url) {
-      const encodedFileName = url.split('/').pop();
-      try {
-        return decodeURIComponent(encodedFileName);
-      } catch (err) {
-        console.error("파일명 디코딩 오류:", err);
-        return encodedFileName;
-      }
-    },
     async fetchUsers() {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       try {
@@ -179,7 +165,7 @@ export default {
           this.users = data.users;
         } else {
           console.error("회원 정보 불러오기 오류:", data);
-          Swal.fire({
+          swalWithCenter.fire({
             icon: 'error',
             title: '오류',
             text: '회원 정보를 불러오는데 실패했습니다.'
@@ -187,7 +173,7 @@ export default {
         }
       } catch (err) {
         console.error("회원 정보 불러오기 오류:", err);
-        Swal.fire({
+        swalWithCenter.fire({
           icon: 'error',
           title: '오류',
           text: '회원 정보를 불러오는데 실패했습니다.'
@@ -195,7 +181,7 @@ export default {
       }
     },
     async deleteUser(userId) {
-      const result = await Swal.fire({
+      const result = await swalWithCenter.fire({
         title: '정말 삭제하시겠습니까?',
         icon: 'warning',
         showCancelButton: true,
@@ -209,7 +195,7 @@ export default {
             headers: { "Content-Type": "application/json" },
           });
           const data = await res.json();
-          await Swal.fire({
+          await swalWithCenter.fire({
             icon: 'success',
             title: '삭제 완료',
             text: data.message || '삭제되었습니다.'
@@ -217,7 +203,7 @@ export default {
           this.fetchUsers();
         } catch (err) {
           console.error("회원 삭제 오류:", err);
-          Swal.fire({
+          swalWithCenter.fire({
             icon: 'error',
             title: '오류',
             text: '회원 삭제에 실패했습니다.'
@@ -243,7 +229,7 @@ export default {
           this.estimates = data.estimates;
         } else {
           console.error("견적 요청 데이터 불러오기 오류:", data);
-          Swal.fire({
+          swalWithCenter.fire({
             icon: 'error',
             title: '오류',
             text: '견적 요청 데이터를 불러오는데 실패했습니다.'
@@ -251,7 +237,7 @@ export default {
         }
       } catch (err) {
         console.error("견적 요청 데이터 불러오기 오류:", err);
-        Swal.fire({
+        swalWithCenter.fire({
           icon: 'error',
           title: '오류',
           text: '견적 요청 데이터를 불러오는데 실패했습니다.'
@@ -259,14 +245,14 @@ export default {
       }
     },
     sendEstimate(estimate) {
-      Swal.fire({
+      swalWithCenter.fire({
         icon: 'info',
         title: '알림',
         text: '견적서 전송 기능은 현재 미구현 상태입니다.'
       });
     },
     async completeProject(estimate) {
-      const result = await Swal.fire({
+      const result = await swalWithCenter.fire({
         title: '프로젝트 완료 처리',
         text: '해당 프로젝트를 완료 처리하시겠습니까?',
         icon: 'question',
@@ -282,14 +268,14 @@ export default {
           });
           const data = await res.json();
           if (data.success) {
-            await Swal.fire({
+            await swalWithCenter.fire({
               icon: 'success',
               title: '완료 처리',
               text: '프로젝트가 완료 처리되었습니다.'
             });
             this.fetchEstimates();
           } else {
-            await Swal.fire({
+            await swalWithCenter.fire({
               icon: 'error',
               title: '오류',
               text: data.message || '프로젝트 완료 처리에 실패했습니다.'
@@ -297,7 +283,7 @@ export default {
           }
         } catch (err) {
           console.error("프로젝트 완료 처리 오류:", err);
-          Swal.fire({
+          swalWithCenter.fire({
             icon: 'error',
             title: '오류',
             text: '프로젝트 완료 처리 중 오류 발생'
@@ -306,7 +292,7 @@ export default {
       }
     },
     async deleteEstimate(estimateId) {
-      const result = await Swal.fire({
+      const result = await swalWithCenter.fire({
         title: '정말 삭제하시겠습니까?',
         icon: 'warning',
         showCancelButton: true,
@@ -320,7 +306,7 @@ export default {
             headers: { "Content-Type": "application/json" },
           });
           const data = await res.json();
-          await Swal.fire({
+          await swalWithCenter.fire({
             icon: 'success',
             title: '삭제 완료',
             text: data.message || '삭제되었습니다.'
@@ -328,7 +314,7 @@ export default {
           this.fetchEstimates();
         } catch (err) {
           console.error("견적 삭제 오류:", err);
-          Swal.fire({
+          swalWithCenter.fire({
             icon: 'error',
             title: '오류',
             text: '견적 삭제에 실패했습니다.'
