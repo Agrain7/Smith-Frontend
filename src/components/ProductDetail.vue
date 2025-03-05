@@ -60,7 +60,8 @@
 
       <!-- 진행상황 텍스트 (오른쪽 정렬) -->
       <div class="progress-status">
-        <p>진행상황: {{ estimate && estimate.fileSubmitted ? '견적파일 제출완료' : '견적파일 미제출' }}</p>
+        <!-- uploadStatus를 사용하여 진행 상태 표시 -->
+        <p>진행상황: {{ uploadStatus }}</p>
         <button class="detail-estimate-button" @click="onDetailEstimateClick" :disabled="isDetailDisabled">
           {{ detailStatus }}
         </button>
@@ -130,6 +131,7 @@ export default {
       },
       selectedMaterial: 'SM275',
       quantity: 1,
+      // 초기 상태는 '견적파일 미제출'로 지정
       uploadStatus: '견적파일 미제출',
       detailStatus: '세부견적 확인',
       isDetailDisabled: true,

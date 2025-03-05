@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- CSP 메타 태그 수정: connect-src 및 style-src에 unsafe-inline 추가 -->
+    <!-- CSP 메타 태그 수정: style-src 'self' 'unsafe-inline' 추가 -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       connect-src 'self' http://localhost:5000 https://*.s3.amazonaws.com https://smithapp-bbc6f2929f0b.herokuapp.com;
