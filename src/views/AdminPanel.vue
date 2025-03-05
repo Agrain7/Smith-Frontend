@@ -167,7 +167,7 @@ export default {
       currentTab: 'members', // 기본 탭: 회원관리
       users: [],
       estimates: [],
-      // 오늘의 가격 관리 탭에서 사용할 로컬 복사본 (백엔드 API로부터 불러온 값)
+      // 로컬 복사본: 백엔드에서 불러온 가격 설정을 저장
       localPriceConfig: {
         sm275: 1000,
         sm355: 1200,
@@ -372,35 +372,35 @@ export default {
       link.click();
       document.body.removeChild(link);
     },
-    // 오늘의 가격 관리 탭 저장: 백엔드 PUT /api/price-config 호출
+    // 오늘의 가격 관리 탭 저장: PUT /api/price-config 호출
     async savePriceConfig() {
-  try {
-    const res = await fetch(`${API_URL}/api/price-config`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(this.localPriceConfig) // localPriceConfig 값 전송
-    });
-    const data = await res.json();
-    if (data.success) {
-      await swalWithCenter.fire({
-        icon: 'success',
-        title: '저장 완료',
-        text: '오늘의 가격 정보가 업데이트되었습니다.'
-      });
-      this.$store.commit('updatePriceConfig', this.localPriceConfig);
-    } else {
-      await swalWithCenter.fire({
-        icon: 'error',
-        title: '오류',
-        text: '가격 설정 업데이트에 실패했습니다.'
-      });
-    }
-  } catch (error) {
-    console.error("가격 설정 업데이트 오류:", error);
-  }
-}
-,
-    // 관리자페이지 진입 시, 백엔드에서 현재 가격 설정 불러오기
+      try {
+        const res = await fetch(`${API_URL}/api/price-config`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(this.localPriceConfig)
+        });
+        const data = await res.json();
+        if (data.success) {
+          await swalWithCenter.fire({
+            icon: 'success',
+            title: '저장 완료',
+            text: '오늘의 가격 정보가 업데이트되었습니다.'
+          });
+          // 스토어의 가격 설정도 업데이트
+          this.$store.commit('updatePriceConfig', this.localPriceConfig);
+        } else {
+          await swalWithCenter.fire({
+            icon: 'error',
+            title: '오류',
+            text: '가격 설정 업데이트에 실패했습니다.'
+          });
+        }
+      } catch (error) {
+        console.error("가격 설정 업데이트 오류:", error);
+      }
+    },
+    // 관리자페이지 진입 시 백엔드에서 가격 설정 불러오기
     async fetchPriceConfig() {
       try {
         const res = await fetch(`${API_URL}/api/price-config`, {
@@ -409,7 +409,7 @@ export default {
         });
         const data = await res.json();
         if (data.success && data.config) {
-          this.priceConfig = data.config;
+          this.localPriceConfig = data.config;
         }
       } catch (error) {
         console.error("가격 설정 불러오기 오류:", error);
