@@ -2,8 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- CSP 메타 태그 추가: 'unsafe-inline'을 포함하여 inline style 적용 허용 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';">
+    <!-- CSP 메타 태그 수정: 
+         - default-src 'self' : 기본 리소스는 self만 허용
+         - connect-src: API 서버 (http://localhost:5000)와 AWS S3 (https://*.s3.amazonaws.com) 허용
+         - style-src: inline 스타일 사용 허용 -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      connect-src 'self' http://localhost:5000 https://*.s3.amazonaws.com;
+      style-src 'self' 'unsafe-inline';
+    ">
     <link rel="icon" type="image/svg+xml" href="/steel.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SMITH | 쉽고 빠른 현장 부재 구매는 SMITH</title>
