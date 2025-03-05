@@ -1,12 +1,21 @@
-// frontend/store/index.js
+// frontend/src/store/index.js
 import { createStore } from 'vuex';
 
-// Vite 환경 변수에서 API URL을 가져옵니다.
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default createStore({
   state: {
     token: localStorage.getItem('token') || sessionStorage.getItem('token') || null,
+    // 오늘의 가격 관련 설정 (기본값)
+    priceConfig: {
+      sm275: 1000,
+      sm355: 1200,
+      processingFee: {
+        "현장용소부재": 199,
+        "공장용소부재": 188,
+        "브라켓": 177
+      }
+    }
   },
   mutations: {
     setToken(state, { token, autoLogin }) {
@@ -24,6 +33,17 @@ export default createStore({
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
     },
+    // priceConfig 업데이트 mutation
+    updatePriceConfig(state, payload) {
+      state.priceConfig = {
+        ...state.priceConfig,
+        ...payload,
+        processingFee: {
+          ...state.priceConfig.processingFee,
+          ...payload.processingFee
+        }
+      };
+    }
   },
   actions: {
     async login({ commit }, payload) {
@@ -51,10 +71,17 @@ export default createStore({
     logout({ commit }) {
       commit('clearToken');
     },
+    // 오늘의 가격 설정 업데이트 액션
+    updatePriceConfig({ commit }, newConfig) {
+      commit('updatePriceConfig', newConfig);
+    }
   },
   getters: {
     isLoggedIn(state) {
       return !!state.token;
     },
+    priceConfig(state) {
+      return state.priceConfig;
+    }
   },
 });

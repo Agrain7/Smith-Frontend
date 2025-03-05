@@ -1,5 +1,4 @@
 <!-- frontend/src/components/NavBar.vue -->
-
 <template>
   <nav class="top-nav-bar">
     <ul>
@@ -18,12 +17,9 @@
       <li v-if="isLoggedIn">
         <a href="#" @click.prevent="logout">로그아웃</a>
       </li>
-      <!-- 관리자인 경우 "관리자 페이지" 버튼, 아닌 경우 "고객센터" 버튼 -->
+      <!-- 관리자인 경우 "관리자 페이지" 버튼만 표시 -->
       <li v-if="isAdmin">
         <router-link to="/admin">관리자 페이지</router-link>
-      </li>
-      <li v-else>
-        <a href="#">고객센터</a>
       </li>
     </ul>
   </nav>

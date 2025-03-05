@@ -1,3 +1,4 @@
+<!-- frontend/src/views/AdminPanel.vue -->
 <template>
   <div class="admin-panel">
     <h1>관리자 페이지</h1>
@@ -7,6 +8,11 @@
         :class="{ active: currentTab === 'members' }" 
         @click="currentTab = 'members'">
         회원관리
+      </button>
+      <button 
+        :class="{ active: currentTab === 'prices' }" 
+        @click="currentTab = 'prices'">
+        오늘의 가격 관리
       </button>
       <button 
         :class="{ active: currentTab === 'estimates' }" 
@@ -47,6 +53,32 @@
         </table>
       </div>
 
+      <!-- 오늘의 가격 관리 탭 -->
+      <div v-if="currentTab === 'prices'" class="price-management">
+        <h2>오늘의 가격 관리</h2>
+        <div class="form-group">
+          <label>SM275 가격 (원/kg):</label>
+          <input type="number" v-model.number="localPriceConfig.sm275" />
+        </div>
+        <div class="form-group">
+          <label>SM355 가격 (원/kg):</label>
+          <input type="number" v-model.number="localPriceConfig.sm355" />
+        </div>
+        <div class="form-group">
+          <label>현장용소부재 가공비 (원/kg):</label>
+          <input type="number" v-model.number="localPriceConfig.processingFee['현장용소부재']" />
+        </div>
+        <div class="form-group">
+          <label>공장용소부재 가공비 (원/kg):</label>
+          <input type="number" v-model.number="localPriceConfig.processingFee['공장용소부재']" />
+        </div>
+        <div class="form-group">
+          <label>브라켓 가공비 (원/kg):</label>
+          <input type="number" v-model.number="localPriceConfig.processingFee['브라켓']" />
+        </div>
+        <button @click="savePriceConfig">저장</button>
+      </div>
+
       <!-- 프로젝트 및 견적서 전송 탭 -->
       <div v-if="currentTab === 'estimates'">
         <table>
@@ -70,7 +102,6 @@
               <td>{{ estimate.phone }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <!-- 다운로드 링크: 저장명 묻는 기능 제거, 바로 파일명 사용 -->
                 <a href="#" @click.prevent="downloadFile(estimate)">파일 다운로드</a>
               </td>
               <td>
@@ -135,7 +166,17 @@ export default {
     return {
       currentTab: 'members', // 기본 탭: 회원관리
       users: [],
-      estimates: []  // 모든 견적 요청 데이터
+      estimates: [],
+      // 오늘의 가격 관리 탭에서 사용할 로컬 복사본 (백엔드 API로부터 불러온 값)
+      localPriceConfig: {
+        sm275: 1000,
+        sm355: 1200,
+        processingFee: {
+          "현장용소부재": 199,
+          "공장용소부재": 188,
+          "브라켓": 177
+        }
+      }
     };
   },
   computed: {
@@ -323,7 +364,6 @@ export default {
         }
       }
     },
-    // 다운로드 시 파일명을 묻지 않고 서버에서 반환한 파일명 그대로 사용
     downloadFile(estimate) {
       const link = document.createElement('a');
       link.href = estimate.fileUrl;
@@ -331,11 +371,79 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    },
+    // 오늘의 가격 관리 탭 저장: 백엔드 PUT /api/price-config 호출
+    async savePriceConfig() {
+      try {
+        const res = await fetch(`${API_URL}/api/price-config`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(this.priceConfig)
+        });
+        const data = await res.json();
+        if (data.success) {
+          await swalWithCenter.fire({
+            icon: 'success',
+            title: '저장 완료',
+            text: '오늘의 가격 정보가 업데이트되었습니다.'
+          });
+          // 가격 업데이트 후, 스토어의 값도 최신값으로 반영 (원하는 경우)
+          this.$store.commit('updatePriceConfig', this.priceConfig);
+        } else {
+          await swalWithCenter.fire({
+            icon: 'error',
+            title: '오류',
+            text: '가격 설정 업데이트에 실패했습니다.'
+          });
+        }
+      } catch (error) {
+        console.error("가격 설정 업데이트 오류:", error);
+      }
+    },
+    // 관리자페이지 진입 시, 백엔드에서 현재 가격 설정 불러오기
+    async fetchPriceConfig() {
+      try {
+        const res = await fetch(`${API_URL}/api/price-config`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        if (data.success && data.config) {
+          this.priceConfig = data.config;
+        }
+      } catch (error) {
+        console.error("가격 설정 불러오기 오류:", error);
+      }
+    },
+    checkEstimateStatus() {
+      if (!this.isLoggedIn) return;
+      const username = this.currentUserData.username;
+      const projectName = this.product.name;
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      fetch(`${apiUrl}/api/estimate-request?username=${encodeURIComponent(username)}&projectName=${encodeURIComponent(projectName)}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.estimates && data.estimates.length > 0) {
+            const estimate = data.estimates[0];
+            this.uploadStatus = estimate.fileSubmitted ? '견적파일 제출완료' : '견적파일 미제출';
+          } else {
+            this.uploadStatus = '견적파일 미제출';
+          }
+        })
+        .catch(error => {
+          console.error("견적 요청 상태 확인 오류:", error);
+          this.uploadStatus = '견적파일 미제출';
+        });
     }
   },
   mounted() {
     this.fetchUsers();
     this.fetchEstimates();
+    this.fetchPriceConfig();
+    this.checkEstimateStatus();
   }
 };
 </script>
@@ -426,5 +534,46 @@ button:hover {
   background-color: #ccc;
   border-color: #ccc;
   cursor: not-allowed;
+}
+
+/* 오늘의 가격 관리 탭 스타일 */
+.price-management {
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.price-management h2 {
+  margin-bottom: 20px;
+}
+
+.price-management .form-group {
+  margin-bottom: 15px;
+}
+
+.price-management label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.price-management input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.price-management button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
 }
 </style>

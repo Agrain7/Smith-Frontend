@@ -21,13 +21,16 @@
           <p class="price-title">오늘의 철강가격:</p>
           <label>
             <input type="radio" value="SM275" v-model="selectedMaterial" />
-            SM275 <span class="material-price">(1000원/kg)</span>
+            SM275 <span class="material-price">( {{ priceConfig.sm275 }}원/kg )</span>
           </label>
           <label>
             <input type="radio" value="SM355" v-model="selectedMaterial" />
-            SM355 <span class="material-price">(1200원/kg)</span>
+            SM355 <span class="material-price">( {{ priceConfig.sm355 }}원/kg )</span>
           </label>
-          <p class="processing-fee">오늘의 가공비 199원/kg</p>
+          <!-- 동적으로 가공비 표시 (store의 priceConfig에서 가져온 값) -->
+          <p class="processing-fee">
+            오늘의 가공비: {{ product.processingFee }}원/kg
+          </p>
         </div>
 
         <!-- 오른쪽 영역: 주문수량 및 가격 -->
@@ -52,10 +55,11 @@
           @click="handleEstimateRequest">
           세부단가 견적요청
         </button>
-        <!-- ? 버튼: 로그인 상태가 아닐 때 비활성화, 로그인 상태이면 클릭 시 Estimate 페이지로 이동 -->
         <button class="help-button" 
                 @click="showHelp" 
-                :disabled="!isLoggedIn">?</button>
+                :disabled="!isLoggedIn">
+          ?
+        </button>
       </div>
 
       <!-- 진행상황 텍스트 (오른쪽 정렬) -->
@@ -84,10 +88,7 @@
 import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
 import product1 from '@/assets/product1.webp'
 import product2 from '@/assets/product2.webp'
-import product3 from '@/assets/product3.webp'
-import product4 from '@/assets/product4.webp'
-import product5 from '@/assets/product5.webp'
-import product6 from '@/assets/product6.webp'
+import product4 from '@/assets/product4.webp'  // 브라켓 이미지
 
 export default {
   name: "ProductDetail",
@@ -96,41 +97,26 @@ export default {
   },
   data() {
     return {
+      // 제품 목록: "철판", "볼트", "야" 항목 제거하고 남은 3개 항목만 포함
       products: {
         '현장용소부재': {
           image: product1,
           name: '현장용소부재',
-          description: '현장용소부재에 대한 상세 설명입니다.',
+          description: '현장용소부재에 대한 상세 설명입니다.'
         },
         '공장용소부재': {
           image: product2,
           name: '공장용소부재',
-          description: '공장용소부재에 대한 상세 설명입니다.',
-        },
-        '철판': {
-          image: product3,
-          name: '철판',
-          description: '철판에 대한 상세 설명입니다.',
+          description: '공장용소부재에 대한 상세 설명입니다.'
         },
         '브라켓': {
           image: product4,
           name: '브라켓',
-          description: '브라켓에 대한 상세 설명입니다.',
-        },
-        '볼트': {
-          image: product5,
-          name: '볼트',
-          description: '볼트에 대한 상세 설명입니다.',
-        },
-        '야': {
-          image: product6,
-          name: '야',
-          description: '야 제품에 대한 상세 설명입니다.',
-        },
+          description: '브라켓에 대한 상세 설명입니다.'
+        }
       },
       selectedMaterial: 'SM275',
       quantity: 1,
-      // 초기 상태는 '견적파일 미제출'로 지정
       uploadStatus: '견적파일 미제출',
       detailStatus: '세부견적 확인',
       isDetailDisabled: true,
@@ -138,13 +124,24 @@ export default {
     }
   },
   computed: {
+    // Vuex 스토어의 가격 설정 값을 가져옴
+    priceConfig() {
+      return this.$store.state.priceConfig;
+    },
+    // 현재 제품 데이터를 가져오고, store의 processingFee 값을 병합하여 동적으로 설정
     product() {
       const productId = this.$route.params.productId;
-      return this.products[productId] || { name: '', description: '', image: '' };
+      const baseProduct = this.products[productId] || this.products['현장용소부재'];
+      return {
+        ...baseProduct,
+        processingFee: this.$store.state.priceConfig.processingFee[baseProduct.name] || 0
+      };
     },
     computedPrice() {
-      const basePrice = this.selectedMaterial === 'SM275' ? 1000 : 1200;
-      const processingFee = 199;
+      const basePrice = this.selectedMaterial === 'SM275' 
+        ? this.$store.state.priceConfig.sm275 
+        : this.$store.state.priceConfig.sm355;
+      const processingFee = this.product.processingFee;
       return (basePrice + processingFee) * 1000 * this.quantity;
     },
     computedPriceFormatted() {
@@ -180,7 +177,6 @@ export default {
       }
       this.showEstimateModal = true;
     },
-    // ? 버튼 클릭 시 로그인 여부 확인 후 Estimate 페이지로 이동
     showHelp() {
       if (!this.isLoggedIn) {
         alert("로그인 후 이용 가능합니다.");
@@ -189,7 +185,6 @@ export default {
       this.$router.push('/estimate');
     },
     onDetailEstimateClick() {
-      // 견적 요청 상태 확인 API 호출 (예시)
       fetch(`${import.meta.env.VITE_API_URL}/api/estimate-request/status`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -209,18 +204,18 @@ export default {
         });
     },
     buyNow() {
-      const basePrice = this.selectedMaterial === 'SM275' ? 1000 : 1200;
-      const processingFee = 199;
+      const basePrice = this.selectedMaterial === 'SM275' 
+        ? this.$store.state.priceConfig.sm275 
+        : this.$store.state.priceConfig.sm355;
+      const processingFee = this.product.processingFee;
       const totalPrice = (basePrice + processingFee) * 1000 * this.quantity;
-      const shippingCost = 3000; // 예시 배송비
+      const shippingCost = 3000;
       const url = `/purchase?price=${totalPrice}&shipping=${shippingCost}`;
       window.open(url, '_blank', 'width=800,height=800');
     },
-    // 사용자의 토큰(username)과 현재 제품의 이름을 기반으로 견적 요청 정보를 조회하여 uploadStatus 업데이트
     checkEstimateStatus() {
       if (!this.isLoggedIn) return;
       const username = this.currentUserData.username;
-      // 현재 제품의 이름을 프로젝트명으로 가정 (혹은 다른 고유 값을 사용)
       const projectName = this.product.name;
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       fetch(`${apiUrl}/api/estimate-request?username=${encodeURIComponent(username)}&projectName=${encodeURIComponent(projectName)}`, {
@@ -230,7 +225,6 @@ export default {
         .then(res => res.json())
         .then(data => {
           if (data.success && data.estimates && data.estimates.length > 0) {
-            // 해당 조건에 맞는 견적 요청이 있으면 fileSubmitted에 따라 상태 업데이트
             const estimate = data.estimates[0];
             this.uploadStatus = estimate.fileSubmitted ? '견적파일 제출완료' : '견적파일 미제출';
           } else {
@@ -244,7 +238,6 @@ export default {
     }
   },
   mounted() {
-    // 페이지가 로드되면 견적 요청 상태를 확인합니다.
     this.checkEstimateStatus();
   }
 };
