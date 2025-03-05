@@ -1,75 +1,96 @@
 <!-- frontend/src/views/Mypage.vue -->
-
 <template>
-    <div class="mypage">
-      <h1>완료된 거래 내역</h1>
-      <div v-if="completedTransactions.length">
-        <div class="transaction" v-for="tx in completedTransactions" :key="tx.id">
-          <h2>{{ tx.productName }}</h2>
-          <p>거래 수량: {{ tx.quantity }}</p>
-          <p>최종 가격: {{ tx.finalPrice }} 원</p>
-          <p>거래 완료 날짜: {{ tx.completedDate }}</p>
-          <p>기타 정보: {{ tx.notes }}</p>
-        </div>
-      </div>
-      <div v-else>
-        <p>완료된 거래 내역이 없습니다.</p>
-      </div>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    name: "Mypage",
-    data() {
-      return {
-        // 샘플 데이터: 실제 구현 시 API 호출 등을 통해 동적으로 받아올 수 있음.
-        completedTransactions: [
-          {
-            id: 1,
-            productName: "부재 A",
-            quantity: 10,
-            finalPrice: 480000,
-            completedDate: "2025-01-15",
-            notes: "할인 적용, 원활한 거래 완료",
-          },
-          {
-            id: 2,
-            productName: "부재 C",
-            quantity: 7,
-            finalPrice: 350000,
-            completedDate: "2025-02-01",
-            notes: "추가 요청사항 반영",
-          },
-        ],
-      };
+  <div class="mypage">
+    <h1>마이 페이지</h1>
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>제품명</th>
+          <th>프로젝트명</th>
+          <th>견적서 확인하기</th>
+          <th>주문하기</th>
+          <th>기타</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="order in orders" :key="order.id">
+          <td>{{ order.productName }}</td>
+          <td>{{ order.projectName }}</td>
+          <td>
+            <button @click="viewEstimate(order)">견적서 확인하기</button>
+          </td>
+          <td>
+            <button @click="orderNow(order)">주문하기</button>
+          </td>
+          <td>{{ order.notes }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "Mypage",
+  data() {
+    return {
+      // 샘플 주문 데이터; 실제 데이터는 API나 Vuex에서 받아오도록 수정
+      orders: [
+        { id: 1, productName: "현장용소부재", projectName: "프로젝트 A", notes: "특별 할인 적용" },
+        { id: 2, productName: "공장용소부재", projectName: "프로젝트 B", notes: "추가 옵션 있음" },
+        { id: 3, productName: "브라켓", projectName: "프로젝트 C", notes: "배송 지연 중" }
+      ]
+    }
+  },
+  methods: {
+    viewEstimate(order) {
+      alert(`제품 ${order.productName}의 견적서를 확인합니다.`);
     },
-  };
-  </script>
-  
-  <style scoped>
-  .mypage {
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
+    orderNow(order) {
+      alert(`제품 ${order.productName}을 주문합니다.`);
+    }
   }
-  
-  .transaction {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 15px;
-    margin-bottom: 15px;
-  }
-  
-  .transaction h2 {
-    margin: 0 0 10px;
-    font-size: 20px;
-    color: #28a745;
-  }
-  
-  .transaction p {
-    margin: 5px 0;
-    font-size: 14px;
-  }
-  </style>
-  
+};
+</script>
+
+<style scoped>
+.mypage {
+  width: 1080px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.orders-table th,
+.orders-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.orders-table th {
+  background-color: #f2f2f2;
+}
+
+.orders-table button {
+  padding: 4px 8px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.orders-table button:hover {
+  background-color: #0056b3;
+}
+</style>

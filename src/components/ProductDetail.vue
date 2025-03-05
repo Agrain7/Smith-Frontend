@@ -27,7 +27,7 @@
             <input type="radio" value="SM355" v-model="selectedMaterial" />
             SM355 <span class="material-price">( {{ priceConfig.sm355 }}원/kg )</span>
           </label>
-          <!-- 동적으로 가공비 표시 (store의 priceConfig에서 가져온 값) -->
+          <!-- 동적으로 가공비 표시 -->
           <p class="processing-fee">
             오늘의 가공비: {{ product.processingFee }}원/kg
           </p>
@@ -47,7 +47,7 @@
         </div>
       </div>
 
-      <!-- 세부단가 견적요청 섹션 -->
+      <!-- 세부단가 견적요청 섹션 (도움말 버튼 등 제거) -->
       <div class="estimate-request">
         <button 
           class="estimate-button" 
@@ -55,24 +55,6 @@
           @click="handleEstimateRequest">
           세부단가 견적요청
         </button>
-        <button class="help-button" 
-                @click="showHelp" 
-                :disabled="!isLoggedIn">
-          ?
-        </button>
-      </div>
-
-      <!-- 진행상황 텍스트 (오른쪽 정렬) -->
-      <div class="progress-status">
-        <p>진행상황: {{ uploadStatus }}</p>
-        <button class="detail-estimate-button" @click="onDetailEstimateClick" :disabled="isDetailDisabled">
-          {{ detailStatus }}
-        </button>
-      </div>
-
-      <!-- 액션 버튼: 바로 구매 -->
-      <div class="action-buttons">
-        <button class="buy-button" @click="buyNow" :disabled="isDetailDisabled">바로 구매 ></button>
       </div>
     </div>
 
@@ -88,7 +70,7 @@
 import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
 import product1 from '@/assets/product1.webp'
 import product2 from '@/assets/product2.webp'
-import product4 from '@/assets/product4.webp'  // 브라켓 이미지
+import product3 from '@/assets/product3.webp'  // 브라켓 이미지
 
 export default {
   name: "ProductDetail",
@@ -97,7 +79,7 @@ export default {
   },
   data() {
     return {
-      // 제품 목록: "철판", "볼트", "야" 항목 제거하고 남은 3개 항목만 포함
+      // 제품 목록: "철판", "볼트", "야" 항목은 제거하고 남은 3개 항목만 포함
       products: {
         '현장용소부재': {
           image: product1,
@@ -110,16 +92,13 @@ export default {
           description: '공장용소부재에 대한 상세 설명입니다.'
         },
         '브라켓': {
-          image: product4,
+          image: product3,
           name: '브라켓',
           description: '브라켓에 대한 상세 설명입니다.'
         }
       },
       selectedMaterial: 'SM275',
       quantity: 1,
-      uploadStatus: '견적파일 미제출',
-      detailStatus: '세부견적 확인',
-      isDetailDisabled: true,
       showEstimateModal: false,
     }
   },
@@ -128,7 +107,7 @@ export default {
     priceConfig() {
       return this.$store.state.priceConfig;
     },
-    // 현재 제품 데이터를 가져오고, store의 processingFee 값을 병합하여 동적으로 설정
+    // 현재 제품 데이터를 가져오고, store의 processingFee 값을 동적으로 병합
     product() {
       const productId = this.$route.params.productId;
       const baseProduct = this.products[productId] || this.products['현장용소부재'];
@@ -176,69 +155,10 @@ export default {
         return;
       }
       this.showEstimateModal = true;
-    },
-    showHelp() {
-      if (!this.isLoggedIn) {
-        alert("로그인 후 이용 가능합니다.");
-        return;
-      }
-      this.$router.push('/estimate');
-    },
-    onDetailEstimateClick() {
-      fetch(`${import.meta.env.VITE_API_URL}/api/estimate-request/status`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.approved) {
-            this.isDetailDisabled = false;
-            alert("세부견적이 승인되었습니다.");
-          } else {
-            alert("아직 견적 요청이 승인되지 않았습니다.");
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          alert("견적 요청 상태 확인 중 오류 발생");
-        });
-    },
-    buyNow() {
-      const basePrice = this.selectedMaterial === 'SM275' 
-        ? this.$store.state.priceConfig.sm275 
-        : this.$store.state.priceConfig.sm355;
-      const processingFee = this.product.processingFee;
-      const totalPrice = (basePrice + processingFee) * 1000 * this.quantity;
-      const shippingCost = 3000;
-      const url = `/purchase?price=${totalPrice}&shipping=${shippingCost}`;
-      window.open(url, '_blank', 'width=800,height=800');
-    },
-    checkEstimateStatus() {
-      if (!this.isLoggedIn) return;
-      const username = this.currentUserData.username;
-      const projectName = this.product.name;
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      fetch(`${apiUrl}/api/estimate-request?username=${encodeURIComponent(username)}&projectName=${encodeURIComponent(projectName)}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.estimates && data.estimates.length > 0) {
-            const estimate = data.estimates[0];
-            this.uploadStatus = estimate.fileSubmitted ? '견적파일 제출완료' : '견적파일 미제출';
-          } else {
-            this.uploadStatus = '견적파일 미제출';
-          }
-        })
-        .catch(error => {
-          console.error("견적 요청 상태 확인 오류:", error);
-          this.uploadStatus = '견적파일 미제출';
-        });
     }
   },
   mounted() {
-    this.checkEstimateStatus();
+    // 진행상황 관련 함수 제거됨
   }
 };
 </script>
@@ -376,52 +296,5 @@ export default {
 .estimate-button:hover {
   background-color: #28a745;
   color: #fff;
-}
-.help-button {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #6d9eff, #007bff);
-  color: #fff;
-  cursor: pointer;
-  position: relative;
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.help-button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-}
-.progress-status {
-  text-align: right;
-  font-size: 16px;
-  color: #333;
-}
-.action-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  margin-top: 10px;
-}
-.buy-button {
-  width: 50%;
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  border: 2px solid #007bff;
-  background-color: #007bff;
-  color: #fff;
-  border-radius: 4px;
-  transition: background-color 0.3s, border-color 0.3s;
-}
-.buy-button:disabled {
-  background-color: #ccc;
-  border-color: #ccc;
-  cursor: not-allowed;
 }
 </style>

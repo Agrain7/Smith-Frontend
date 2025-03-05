@@ -1,75 +1,91 @@
 <!-- frontend/src/views/Basket.vue -->
-
 <template>
-    <div class="basket-page">
-      <h1>진행중인 구매 목록</h1>
-      <div v-if="orders.length">
-        <div class="order" v-for="order in orders" :key="order.id">
-          <h2>{{ order.productName }}</h2>
-          <p>주문 수량: {{ order.quantity }}</p>
-          <p>예상 가격: {{ order.estimatedPrice }} 원</p>
-          <p>견적 파일 진행 상황: {{ order.estimateStatus }}</p>
-          <p>세부 견적 파일 진행 상황: {{ order.detailEstimateStatus }}</p>
-        </div>
-      </div>
-      <div v-else>
-        <p>진행중인 구매가 없습니다.</p>
-      </div>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    name: "Basket",
-    data() {
-      return {
-        // 샘플 데이터: 실제 구현 시 API로부터 받아오거나 Vuex 등으로 관리
-        orders: [
-          {
-            id: 1,
-            productName: "부재 A",
-            quantity: 10,
-            estimatedPrice: 500000,
-            estimateStatus: "진행중", // 예: 견적파일 업로드 진행 중
-            detailEstimateStatus: "파일 검토 중",
-          },
-          {
-            id: 2,
-            productName: "부재 B",
-            quantity: 5,
-            estimatedPrice: 300000,
-            estimateStatus: "완료",
-            detailEstimateStatus: "확인 완료",
-          },
-        ],
-      };
-    },
-  };
-  </script>
-  
-  <style scoped>
-  .basket-page {
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
+  <div class="basket">
+    <h1>장바구니</h1>
+    <table class="basket-table">
+      <thead>
+        <tr>
+          <th>제품명</th>
+          <th>수량</th>
+          <th>가격 (원)</th>
+          <th>합계 (원)</th>
+          <th>삭제</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in cartItems" :key="item.id">
+          <td>{{ item.productName }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.price }}</td>
+          <td>{{ (item.price * item.quantity).toLocaleString('ko-KR') }}</td>
+          <td>
+            <button @click="removeItem(item.id)">삭제</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "Basket",
+  data() {
+    return {
+      // 샘플 장바구니 데이터; 실제 데이터는 API나 Vuex에서 받아오도록 수정
+      cartItems: [
+        { id: 1, productName: "현장용소부재", quantity: 2, price: 50000 },
+        { id: 2, productName: "공장용소부재", quantity: 1, price: 75000 },
+        { id: 3, productName: "브라켓", quantity: 3, price: 30000 }
+      ]
+    }
+  },
+  methods: {
+    removeItem(id) {
+      this.cartItems = this.cartItems.filter(item => item.id !== id);
+    }
   }
-  
-  .order {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 15px;
-    margin-bottom: 15px;
-  }
-  
-  .order h2 {
-    margin: 0 0 10px;
-    font-size: 20px;
-    color: #007bff;
-  }
-  
-  .order p {
-    margin: 5px 0;
-    font-size: 14px;
-  }
-  </style>
-  
+};
+</script>
+
+<style scoped>
+.basket {
+  width: 1080px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.basket-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.basket-table th,
+.basket-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.basket-table th {
+  background-color: #f2f2f2;
+}
+
+.basket-table button {
+  padding: 4px 8px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.basket-table button:hover {
+  background-color: #0056b3;
+}
+</style>
