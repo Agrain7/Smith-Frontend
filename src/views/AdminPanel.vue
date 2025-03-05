@@ -47,7 +47,7 @@
         </table>
       </div>
 
-      <!-- 프로젝트 및 견적서 전송 탭 (이메일 칸 제거) -->
+      <!-- 프로젝트 및 견적서 전송 탭 -->
       <div v-if="currentTab === 'estimates'">
         <table>
           <thead>
@@ -70,9 +70,8 @@
               <td>{{ estimate.phone }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <a :href="estimate.fileUrl" target="_blank" :download="estimate.fileName">
-                  파일 다운로드
-                </a>
+                <!-- 다운로드 링크 클릭 시 downloadFile 메서드 호출 -->
+                <a href="#" @click.prevent="downloadFile(estimate)">파일 다운로드</a>
               </td>
               <td>
                 <button @click="sendEstimate(estimate)">전송</button>
@@ -85,7 +84,7 @@
         </table>
       </div>
 
-      <!-- 완료 프로젝트 탭 (이메일 칸 제거) -->
+      <!-- 완료 프로젝트 탭 -->
       <div v-if="currentTab === 'completed'">
         <table>
           <thead>
@@ -107,9 +106,8 @@
               <td>{{ estimate.phone }}</td>
               <td>{{ estimate.projectName }}</td>
               <td>
-                <a :href="estimate.fileUrl" target="_blank" :download="estimate.fileName">
-                  파일 다운로드
-                </a>
+                <!-- 다운로드 링크 클릭 시 downloadFile 메서드 호출 -->
+                <a href="#" @click.prevent="downloadFile(estimate)">파일 다운로드</a>
               </td>
               <td>
                 <button @click="deleteEstimate(estimate._id)">삭제</button>
@@ -123,7 +121,7 @@
 </template>
 
 <script>
-// SweetAlert2와 CSS 파일 임포트 (SweetAlert2 CSS를 적용하기 위해 추가)
+// SweetAlert2와 CSS 파일 임포트 (다운로드 후 파일명 입력 prompt 등에도 사용)
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -158,7 +156,7 @@ export default {
           method: "GET",
           headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // 토큰 포함
+            "Authorization": `Bearer ${token}`  // 인증 토큰 포함
           },
         });
         const data = await res.json();
@@ -326,6 +324,21 @@ export default {
           });
         }
       }
+    },
+    // 다운로드 링크 클릭 시 호출되는 메서드
+    downloadFile(estimate) {
+      // 기본 파일명은 프로젝트명으로 설정
+      const defaultName = estimate.projectName || '';
+      const fileName = window.prompt('저장할 파일명을 입력하세요', defaultName);
+      if (!fileName) return; // 취소하거나 입력값이 없으면 중단
+
+      // 임시 a 엘리먼트를 생성하여 다운로드 처리
+      const link = document.createElement('a');
+      link.href = estimate.fileUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   },
   mounted() {
