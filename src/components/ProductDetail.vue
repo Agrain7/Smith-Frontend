@@ -296,6 +296,12 @@ export default {
   margin-top: 1px;
   text-align: right;
 }
+.price-title {
+  text-align: left;
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
 .expected-price {
   font-size: 16px;
   color: #333;
