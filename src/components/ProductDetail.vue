@@ -86,7 +86,7 @@ import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
 import product1 from '@/assets/product1.webp'
 import product2 from '@/assets/product2.webp'
 import product3 from '@/assets/product3.webp'
-import emitter from '@/eventBus'; // 이벤트 버스 가져오기
+import emitter from '@/eventBus';  // mitt 이벤트 버스
 
 export default {
   name: "ProductDetail",
@@ -170,22 +170,41 @@ export default {
     }
   },
   methods: {
-    handleEstimateRequest() {
+    async handleEstimateRequest() {
       if (!this.isLoggedIn) {
         alert("로그인 후 사용하세요.");
         this.$router.push("/login");
         return;
       }
-      // 견적 요청 제출 시 제품명과 예시 프로젝트명("새 프로젝트")을 포함한 주문 데이터를 생성
+      // 실제 주문 데이터를 백엔드에 POST 요청으로 전송
       const newOrder = {
-        id: Date.now(), // 유니크 id
+        username: this.currentUserData.username,
         productName: this.product.name,
         projectName: "새 프로젝트", // 실제 프로젝트명 입력값으로 대체 가능
         status: "견적 전송 완료"
       };
-      // 이벤트 버스를 통해 주문 데이터를 발행
-      emitter.emit('orderSubmitted', newOrder);
-      this.showEstimateModal = true;
+      const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
+      try {
+        const response = await fetch('https://smithapp-bbc6f2929f0b.herokuapp.com/api/orders', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(newOrder)
+        });
+        const data = await response.json();
+        if (response.ok) {
+          // 백엔드에 저장된 주문 데이터가 반환되면 이벤트 버스를 통해 MyPage에 전달
+          emitter.emit('orderSubmitted', data.order);
+          this.showEstimateModal = true;
+        } else {
+          alert(data.message || "주문 제출 실패");
+        }
+      } catch (error) {
+        console.error("주문 제출 중 오류:", error);
+        alert("서버와 통신 중 오류 발생");
+      }
     }
   }
 };

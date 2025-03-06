@@ -1,4 +1,3 @@
-<!-- frontend/src/views/Mypage.vue -->
 <template>
   <div class="mypage">
     <h1>마이 페이지</h1>
