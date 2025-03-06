@@ -233,14 +233,14 @@ export default {
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 20px;
 }
 
 /* 각 재료 그룹: 한 줄에 배치 */
 .material-group {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
 }
 .material-label {
   font-weight: bold;
@@ -250,7 +250,8 @@ export default {
 /* 무게 옵션들을 한 줄에 배치 */
 .weight-options {
   display: flex;
-  gap: 20px;
+  flex-direction: column; /* 세로로 쌓이도록 변경 */
+  gap: 20px; /* 원하는 만큼 간격 조정 */
 }
 .weight-options label {
   font-size: 16px;
