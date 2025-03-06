@@ -16,10 +16,14 @@
           <td>{{ order.productName }}</td>
           <td>{{ order.projectName }}</td>
           <td>
-            <button @click="viewEstimate(order)">견적서 확인하기</button>
+            <button @click="viewEstimate(order)" :disabled="order.status !== '견적 전송 완료'">
+  견적서 확인하기
+</button>
           </td>
           <td>
-            <button @click="orderNow(order)">주문하기</button>
+            <button @click="orderNow(order)" :disabled="order.status !== '견적서 확인 완료'">
+  주문하기
+</button>
           </td>
           <td>{{ order.status }}</td>
         </tr>

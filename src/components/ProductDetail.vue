@@ -48,7 +48,7 @@
           </div>
         </div>
 
-        <!-- 프로젝트 제목 입력 필드 추가 -->
+        <!-- 프로젝트 제목 입력 필드 -->
         <div class="order-left">
           <p class="price-title">프로젝트 제목:</p>
           <input type="text" v-model="projectTitle" placeholder="프로젝트 제목을 입력하세요" />
@@ -92,7 +92,7 @@ import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
 import product1 from '@/assets/product1.webp'
 import product2 from '@/assets/product2.webp'
 import product3 from '@/assets/product3.webp'
-import emitter from '@/eventBus';
+import emitter from '@/eventBus'; // mitt 이벤트 버스
 
 export default {
   name: "ProductDetail",
@@ -101,7 +101,6 @@ export default {
   },
   data() {
     return {
-      // 제품 목록 (이미지 등은 그대로 유지)
       products: {
         '현장용 소부재': {
           image: product1,
@@ -119,32 +118,25 @@ export default {
           description: '브라켓에 대한 상세 설명입니다.'
         }
       },
-      // 선택된 재료 옵션: "재료_무게" 형식 (예: "SM275_12~50t")
       selectedMaterialOption: 'SM275_12~50t',
-      // 선택된 가공비 옵션 (기본값)
       selectedProcessingFee: '스플라이스 철판',
       quantity: 1,
-      projectTitle: "", // 사용자가 입력할 프로젝트 제목
+      projectTitle: "",
       showEstimateModal: false,
-      // 재료 목록
       materials: ["비규격", "중국산", "SM275", "SM355"],
-      // 무게 카테고리: 12~50t가 먼저, 9t이하가 나중
       weightCategories: ["12~50t", "9t이하"],
     }
   },
   computed: {
-    // Vuex 스토어의 가격 설정 값을 가져옴
     priceConfig() {
       return this.$store.state.priceConfig;
     },
-    // 제품 정보 (제품명만 사용)
     product() {
       const productId = this.$route.params.productId;
       const baseProduct = this.products[productId] || this.products['현장용 소부재'];
       return baseProduct;
     },
     computedPrice() {
-      // selectedMaterialOption: "SM275_12~50t" 형식에서 분리
       const parts = this.selectedMaterialOption.split('_');
       const material = parts[0];
       const weight = parts[1];
@@ -183,16 +175,15 @@ export default {
         this.$router.push("/login");
         return;
       }
-      // 사용자가 프로젝트 제목을 입력하지 않았다면 경고 처리
       if (!this.projectTitle.trim()) {
         alert("프로젝트 제목을 입력해주세요.");
         return;
       }
-      // 실제 주문 데이터를 백엔드에 POST 요청으로 전송
+      // POST 요청으로 주문 데이터를 백엔드에 저장
       const newOrder = {
         username: this.currentUserData.username,
         productName: this.product.name,
-        projectName: this.projectTitle, // 사용자가 입력한 프로젝트 제목 사용
+        projectName: this.projectTitle,
         status: "견적 요청 전송 완료"
       };
       const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -207,7 +198,6 @@ export default {
         });
         const data = await response.json();
         if (response.ok) {
-          // 백엔드에 저장된 주문 데이터가 반환되면 이벤트 버스를 통해 MyPage에 전달
           emitter.emit('orderSubmitted', data.order);
           this.showEstimateModal = true;
         } else {
@@ -233,7 +223,6 @@ export default {
   font-family: 'Noto Sans KR', sans-serif;
 }
 
-/* 오른쪽 영역 전체 */
 .right-side {
   flex: 1;
   display: flex;
@@ -241,7 +230,6 @@ export default {
   gap: 15px;
 }
 
-/* 중앙 섹션: 제품명만 표시 */
 .middle-section {
   text-align: center;
 }
@@ -251,7 +239,6 @@ export default {
   margin: 0;
 }
 
-/* 주문 정보 섹션 */
 .order-info {
   display: flex;
   flex-direction: column;
@@ -260,7 +247,6 @@ export default {
   padding: 10px;
 }
 
-/* 재료 선택 및 가공비 선택 영역 */
 .material-selection, .processing-selection {
   text-align: left;
   display: flex;
@@ -268,7 +254,6 @@ export default {
   gap: 20px;
 }
 
-/* 각 재료 그룹: 한 줄에 배치 */
 .material-group {
   display: flex;
   align-items: center;
@@ -280,11 +265,10 @@ export default {
 }
 .material-options {
   display: flex;
-  flex-direction: column; /* 각 재료 그룹을 세로로 나열 */
-  gap: 20px; /* 그룹 사이 간격 */
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* 무게 옵션들을 한 줄에 배치 */
 .weight-options {
   display: flex;
   gap: 20px;
@@ -301,7 +285,6 @@ export default {
   color: #777;
 }
 
-/* 주문 오른쪽 영역: 수량 및 가격 */
 .order-right {
   display: flex;
   flex-direction: column;
@@ -351,7 +334,6 @@ export default {
   margin: 0;
 }
 
-/* 견적 요청 버튼 영역 */
 .estimate-request {
   display: flex;
   justify-content: flex-end;
