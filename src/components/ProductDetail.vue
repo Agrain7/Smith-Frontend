@@ -11,7 +11,7 @@
       <div class="order-info">
         <!-- 오늘의 철판가격 영역 -->
         <div class="order-left">
-          <p class="price-title">오늘의 철판가격:</p>
+          <p class="price-title">오늘의 철판가격</p>
           <table class="price-table">
             <thead>
               <tr>
@@ -37,7 +37,7 @@
 
         <!-- 오늘의 가공비 영역 -->
         <div class="order-left">
-          <p class="price-title">오늘의 가공비:</p>
+          <p class="price-title">오늘의 가공비</p>
           <div class="processing-selection">
             <label>
               <input type="radio" value="스플라이스 철판" v-model="selectedProcessingFee" />
@@ -271,10 +271,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  width: 100%;
 }
 
 .price-text {
+  flex: 1;  /* 가격 텍스트가 가능한 공간을 차지 */
   font-size: 14px;
 }
 
@@ -331,4 +332,12 @@ export default {
   text-align: center;
   margin: 0;
 }
+
+.processing-selection {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 </style>
