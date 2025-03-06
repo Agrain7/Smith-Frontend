@@ -1,11 +1,7 @@
-<!-- frontend/src/components/ProductDetail.vue -->
 <template>
   <div class="product-detail">
-    <!-- 왼쪽 영역: 제품 이미지 -->
-    <div class="left-side">
-      <img :src="product.image" alt="제품 이미지" class="product-image" />
-    </div>
-
+    <!-- 왼쪽 영역: 이미지 제거 -->
+    
     <!-- 오른쪽 영역: 제품 정보 및 액션 영역 -->
     <div class="right-side">
       <!-- 중앙 섹션: 제품명, 설명 -->
@@ -14,23 +10,44 @@
         <p class="product-description">{{ product.description }}</p>
       </div>
 
-      <!-- 주문 정보 섹션 (두 영역으로 구성) -->
+      <!-- 주문 정보 섹션 (두 그룹: 철판가격 선택 및 가공비 선택) -->
       <div class="order-info">
-        <!-- 왼쪽 영역: 철강가격 및 가공비 -->
+        <!-- 재료 선택 영역: 오늘의 철판가격 -->
         <div class="order-left">
-          <p class="price-title">오늘의 철강가격:</p>
-          <label>
-            <input type="radio" value="SM275" v-model="selectedMaterial" />
-            SM275 <span class="material-price">( {{ priceConfig.sm275 }}원/kg )</span>
-          </label>
-          <label>
-            <input type="radio" value="SM355" v-model="selectedMaterial" />
-            SM355 <span class="material-price">( {{ priceConfig.sm355 }}원/kg )</span>
-          </label>
-          <!-- 동적으로 가공비 표시 -->
-          <p class="processing-fee">
-            오늘의 가공비: {{ product.processingFee }}원/kg
-          </p>
+          <p class="price-title">오늘의 철판가격:</p>
+          <div class="material-selection">
+            <label>
+              <input type="radio" value="비규격" v-model="selectedMaterial" />
+              비규격 <span class="material-price">( {{ priceConfig["비규격"]["9t이하"] }}원/kg )</span>
+            </label>
+            <label>
+              <input type="radio" value="중국산" v-model="selectedMaterial" />
+              중국산 <span class="material-price">( {{ priceConfig["중국산"]["9t이하"] }}원/kg )</span>
+            </label>
+            <label>
+              <input type="radio" value="SM275" v-model="selectedMaterial" />
+              SM275 <span class="material-price">( {{ priceConfig["SM275"]["9t이하"] }}원/kg )</span>
+            </label>
+            <label>
+              <input type="radio" value="SM355" v-model="selectedMaterial" />
+              SM355 <span class="material-price">( {{ priceConfig["SM355"]["9t이하"] }}원/kg )</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 가공비 선택 영역 -->
+        <div class="order-left">
+          <p class="price-title">오늘의 가공비:</p>
+          <div class="processing-selection">
+            <label>
+              <input type="radio" value="스플라이스 철판" v-model="selectedProcessingFee" />
+              스플라이스 철판 <span class="material-price">( {{ priceConfig.processingFee["스플라이스 철판"] }}원/kg )</span>
+            </label>
+            <label>
+              <input type="radio" value="일반 철판" v-model="selectedProcessingFee" />
+              일반 철판 <span class="material-price">( {{ priceConfig.processingFee["일반 철판"] }}원/kg )</span>
+            </label>
+          </div>
         </div>
 
         <!-- 오른쪽 영역: 주문수량 및 가격 -->
@@ -47,7 +64,7 @@
         </div>
       </div>
 
-      <!-- 세부단가 견적요청 섹션 (도움말 버튼 등 제거) -->
+      <!-- 세부단가 견적요청 섹션 -->
       <div class="estimate-request">
         <button 
           class="estimate-button" 
@@ -70,7 +87,7 @@
 import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
 import product1 from '@/assets/product1.webp'
 import product2 from '@/assets/product2.webp'
-import product3 from '@/assets/product3.webp'  // 브라켓 이미지
+import product3 from '@/assets/product3.webp'
 
 export default {
   name: "ProductDetail",
@@ -79,7 +96,7 @@ export default {
   },
   data() {
     return {
-      // 제품 목록: "철판", "볼트", "야" 항목은 제거하고 남은 3개 항목만 포함
+      // 제품 목록은 그대로 유지 (필요한 경우 업데이트)
       products: {
         '현장용소부재': {
           image: product1,
@@ -97,7 +114,8 @@ export default {
           description: '브라켓에 대한 상세 설명입니다.'
         }
       },
-      selectedMaterial: 'SM275',
+      selectedMaterial: 'SM275',          // 재료 선택 (기본값)
+      selectedProcessingFee: '스플라이스 철판',  // 가공비 선택 (기본값)
       quantity: 1,
       showEstimateModal: false,
     }
@@ -107,21 +125,17 @@ export default {
     priceConfig() {
       return this.$store.state.priceConfig;
     },
-    // 현재 제품 데이터를 가져오고, store의 processingFee 값을 동적으로 병합
+    // 제품 정보는 그대로 사용 (이미지 제외)
     product() {
       const productId = this.$route.params.productId;
       const baseProduct = this.products[productId] || this.products['현장용소부재'];
-      return {
-        ...baseProduct,
-        processingFee: this.$store.state.priceConfig.processingFee[baseProduct.name] || 0
-      };
+      return baseProduct;
     },
     computedPrice() {
-      const basePrice = this.selectedMaterial === 'SM275' 
-        ? this.$store.state.priceConfig.sm275 
-        : this.$store.state.priceConfig.sm355;
-      const processingFee = this.product.processingFee;
-      return (basePrice + processingFee) * 1000 * this.quantity;
+      // 여기서는 기본적으로 '9t이하' 가격을 사용한다고 가정
+      const materialPrice = this.priceConfig[this.selectedMaterial]["9t이하"] || 0;
+      const processingFee = this.priceConfig.processingFee[this.selectedProcessingFee] || 0;
+      return (materialPrice + processingFee) * 1000 * this.quantity;
     },
     computedPriceFormatted() {
       return this.computedPrice.toLocaleString('ko-KR');
@@ -156,9 +170,6 @@ export default {
       }
       this.showEstimateModal = true;
     }
-  },
-  mounted() {
-    // 진행상황 관련 함수 제거됨
   }
 };
 </script>
@@ -173,19 +184,17 @@ export default {
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
 }
-.left-side {
-  flex: 1;
-}
-.product-image {
-  width: 100%;
-  object-fit: contain;
-}
+/* 왼쪽 이미지 영역 제거하므로 .left-side 관련 스타일은 삭제 */
+
+/* 오른쪽 영역 전체 */
 .right-side {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
+
+/* 중앙 섹션: 제품명, 설명 */
 .middle-section {
   text-align: center;
 }
@@ -198,10 +207,12 @@ export default {
   font-size: 16px;
   color: #555;
 }
+
+/* 주문 정보 섹션 */
 .order-info {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 15px;
   border: 1px solid #ddd;
   padding: 10px;
 }
@@ -215,21 +226,20 @@ export default {
   margin: 0 0 5px;
   text-align: left;
 }
-.material-selection label {
+.material-selection label,
+.processing-selection label {
   font-size: 16px;
   cursor: pointer;
   margin-bottom: 5px;
+  display: block;
 }
 .material-price {
   margin-left: 5px;
   font-size: 14px;
   color: #777;
 }
-.processing-fee {
-  font-size: 14px;
-  color: #555;
-  margin-top: 5px;
-}
+
+/* 주문 오른쪽 영역: 수량 및 가격 */
 .order-right {
   display: flex;
   flex-direction: column;
@@ -272,6 +282,8 @@ export default {
   color: #d9534f;
   margin: 0;
 }
+
+/* 견적 요청 버튼 영역 */
 .estimate-request {
   display: flex;
   justify-content: flex-end;
