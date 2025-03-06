@@ -13,7 +13,7 @@
       <div class="right-section">
         <button class="cart-btn" @click="handleBasket">
           <img src="@/assets/cart-icon.png" alt="장바구니 아이콘" class="icon" />
-          <span class="btn-text">장바구니</span>
+          <span class="btn-text">구매내역</span>
         </button>
         <button class="mypage-btn" @click="handleMypage">
           <img src="@/assets/mypage-icon.png" alt="마이페이지 아이콘" class="icon" />

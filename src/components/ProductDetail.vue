@@ -14,11 +14,11 @@
           <p class="price-title">오늘의 철판가격:</p>
           <div class="material-selection">
             <div class="material-options">
-              <!-- 반복: 각 재료 그룹 -->
+              <!-- 각 재료 그룹을 한 줄에 배치 -->
               <div v-for="material in materials" :key="material" class="material-group">
                 <span class="material-label">{{ material }}</span>
                 <div class="weight-options">
-                  <!-- 각 재료별 두 무게 카테고리 -->
+                  <!-- weightCategories 순서: 12~50t, 9t이하 -->
                   <label v-for="weight in weightCategories" :key="material + '_' + weight">
                     <input type="radio" 
                            :value="material + '_' + weight" 
@@ -33,7 +33,7 @@
           </div>
         </div>
 
-        <!-- 가공비 선택 영역 -->
+        <!-- 가공비 선택 영역 (변경 없음) -->
         <div class="order-left">
           <p class="price-title">오늘의 가공비:</p>
           <div class="processing-selection">
@@ -62,7 +62,7 @@
         </div>
       </div>
 
-      <!-- 세부단가 견적요청 섹션 -->
+      <!-- 견적 요청 버튼 영역 -->
       <div class="estimate-request">
         <button 
           class="estimate-button" 
@@ -112,30 +112,31 @@ export default {
           description: '브라켓에 대한 상세 설명입니다.'
         }
       },
-      // 재료 선택: material과 무게 카테고리 결합 (예: "SM275_9t이하")
-      selectedMaterialOption: 'SM275_9t이하',
-      // 가공비 선택: 기본값
+      // 선택된 재료 옵션 (예: "SM275_12~50t")
+      selectedMaterialOption: 'SM275_12~50t',
+      // 선택된 가공비 옵션 (기본값)
       selectedProcessingFee: '스플라이스 철판',
       quantity: 1,
       showEstimateModal: false,
-      // 반복용 배열
+      // 재료 목록
       materials: ["비규격", "중국산", "SM275", "SM355"],
-      weightCategories: ["9t이하", "12~50t"],
+      // 무게 카테고리 순서: 12~50t가 먼저, 9t이하가 나중
+      weightCategories: ["12~50t", "9t이하"],
     }
   },
   computed: {
-    // Vuex 스토어에서 가격 설정 값을 가져옴
+    // Vuex 스토어의 가격 설정 값을 가져옴
     priceConfig() {
       return this.$store.state.priceConfig;
     },
-    // 제품 정보: 이미지 제외하고 제품명만 사용 (설명 제거)
+    // 제품 정보 (제품명만 사용)
     product() {
       const productId = this.$route.params.productId;
       const baseProduct = this.products[productId] || this.products['현장용소부재'];
       return baseProduct;
     },
     computedPrice() {
-      // selectedMaterialOption 형식: "SM275_9t이하"
+      // selectedMaterialOption 형식: "SM275_12~50t"
       const parts = this.selectedMaterialOption.split('_');
       const material = parts[0];
       const weight = parts[1];
@@ -190,6 +191,7 @@ export default {
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
 }
+
 /* 오른쪽 영역 전체 */
 .right-side {
   flex: 1;
@@ -197,7 +199,8 @@ export default {
   flex-direction: column;
   gap: 15px;
 }
-/* 중앙 섹션: 제품명만 표시 (설명 제거) */
+
+/* 중앙 섹션: 제품명만 표시 */
 .middle-section {
   text-align: center;
 }
@@ -206,6 +209,7 @@ export default {
   font-weight: bold;
   margin: 0;
 }
+
 /* 주문 정보 섹션 */
 .order-info {
   display: flex;
@@ -214,30 +218,30 @@ export default {
   border: 1px solid #ddd;
   padding: 10px;
 }
-.order-left {
-  display: flex;
-  flex-direction: column;
-}
-.price-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 0 0 5px;
-  text-align: left;
-}
+
 /* 재료 선택 및 가공비 선택 영역 */
 .material-selection, .processing-selection {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
 }
+
+/* 각 재료 그룹: 한 줄에 배치 */
 .material-group {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: 10px;
 }
+
+/* 재료 레이블 */
 .material-label {
   font-weight: bold;
-  margin-bottom: 5px;
+}
+
+/* 무게 옵션들을 한 줄에 배치 */
+.weight-options {
+  display: flex;
+  gap: 10px;
 }
 .weight-options label {
   font-size: 16px;
@@ -294,6 +298,7 @@ export default {
   color: #d9534f;
   margin: 0;
 }
+
 /* 견적 요청 버튼 영역 */
 .estimate-request {
   display: flex;
