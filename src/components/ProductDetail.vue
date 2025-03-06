@@ -246,12 +246,17 @@ export default {
   font-weight: bold;
   font-size: 16px;
 }
+.material-options {
+  display: flex;
+  flex-direction: column; /* 각 재료 그룹을 세로로 나열 */
+  gap: 20px; /* 각 그룹 사이에 20px 간격 부여 */
+}
+
 
 /* 무게 옵션들을 한 줄에 배치 */
 .weight-options {
   display: flex;
-  flex-direction: column; /* 세로로 쌓이도록 변경 */
-  gap: 20px; /* 원하는 만큼 간격 조정 */
+  gap: 20px;
 }
 .weight-options label {
   font-size: 16px;
