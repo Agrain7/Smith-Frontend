@@ -193,7 +193,7 @@ export default {
 <style scoped>
 .product-detail {
   width: 100%;
-  max-width: 1080px;
+  max-width: 720px;
   margin: 20px auto;
   display: flex;
   gap: 20px;
@@ -233,14 +233,14 @@ export default {
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 40px;
 }
 
 /* 각 재료 그룹: 한 줄에 배치 */
 .material-group {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 40px;
 }
 .material-label {
   font-weight: bold;
