@@ -48,12 +48,6 @@
           </div>
         </div>
 
-        <!-- 프로젝트 제목 입력 필드 -->
-        <div class="order-left">
-          <p class="price-title">프로젝트 제목:</p>
-          <input type="text" v-model="projectTitle" placeholder="프로젝트 제목을 입력하세요" />
-        </div>
-
         <!-- 주문 수량 및 예상 가격 영역 -->
         <div class="order-right">
           <div class="quantity-input">
@@ -101,6 +95,7 @@ export default {
   },
   data() {
     return {
+      // 제품 목록 (이미지 등은 그대로 유지)
       products: {
         '현장용 소부재': {
           image: product1,
@@ -118,12 +113,15 @@ export default {
           description: '브라켓에 대한 상세 설명입니다.'
         }
       },
+      // 선택된 재료 옵션: "재료_무게" 형식 (예: "SM275_12~50t")
       selectedMaterialOption: 'SM275_12~50t',
+      // 선택된 가공비 옵션 (기본값)
       selectedProcessingFee: '스플라이스 철판',
       quantity: 1,
-      projectTitle: "",
       showEstimateModal: false,
+      // 재료 목록
       materials: ["비규격", "중국산", "SM275", "SM355"],
+      // 무게 카테고리: 12~50t가 먼저, 9t이하가 나중
       weightCategories: ["12~50t", "9t이하"],
     }
   },
@@ -175,15 +173,11 @@ export default {
         this.$router.push("/login");
         return;
       }
-      if (!this.projectTitle.trim()) {
-        alert("프로젝트 제목을 입력해주세요.");
-        return;
-      }
-      // POST 요청으로 주문 데이터를 백엔드에 저장
+      // 하드코딩된 프로젝트 제목 대신 이전 상태로 롤백 (프로젝트 제목 입력 필드 제거)
       const newOrder = {
         username: this.currentUserData.username,
         productName: this.product.name,
-        projectName: this.projectTitle,
+        projectName: "새 프로젝트", // 이전 상태: 고정값 사용
         status: "견적 요청 전송 완료"
       };
       const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
