@@ -12,7 +12,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="order in orders" :key="order.id">
+        <tr v-for="order in orders" :key="order._id">
           <td>{{ order.productName }}</td>
           <td>{{ order.projectName }}</td>
           <td>
@@ -33,22 +33,51 @@ export default {
   name: "Mypage",
   data() {
     return {
-      // 초기 샘플 데이터; 실제 데이터는 API나 Vuex에서 받아오도록 수정 가능
-      orders: [
-        { id: 1, productName: "현장용소부재", projectName: "프로젝트 A", status: "견적 전송 완료" },
-        { id: 2, productName: "공장용소부재", projectName: "프로젝트 B", status: "견적 전송 완료" },
-        { id: 3, productName: "브라켓", projectName: "프로젝트 C", status: "견적 전송 완료" }
-      ]
+      orders: [] // 초기 샘플 데이터를 제거하고 빈 배열로 시작
     }
   },
   created() {
-    // 이벤트 버스로 새로운 주문 데이터를 받음
+    // 이벤트 버스로 받은 주문 데이터 추가 (실시간 업데이트)
     this.$root.$on('orderSubmitted', this.addOrder);
+    // 로그인한 사용자 기준으로 백엔드에서 주문 데이터를 가져옵니다.
+    this.fetchOrders();
   },
   beforeDestroy() {
     this.$root.$off('orderSubmitted', this.addOrder);
   },
   methods: {
+    async fetchOrders() {
+      const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) return;
+      
+      // 토큰에서 사용자 아이디를 추출 (예: username)
+      let username = "";
+      try {
+        const payload = token.split('.')[1];
+        const decoded = JSON.parse(decodeURIComponent(escape(window.atob(payload))));
+        username = decoded.username;
+      } catch (error) {
+        console.error("토큰 파싱 오류:", error);
+      }
+      
+      try {
+        const response = await fetch(`https://smithapp-bbc6f2929f0b.herokuapp.com/api/orders?username=${encodeURIComponent(username)}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (response.ok && data.orders) {
+          this.orders = data.orders;
+        } else {
+          console.error("주문 데이터 불러오기 오류:", data);
+        }
+      } catch (error) {
+        console.error("주문 데이터 불러오기 중 오류 발생:", error);
+      }
+    },
     addOrder(newOrder) {
       this.orders.push(newOrder);
     },
