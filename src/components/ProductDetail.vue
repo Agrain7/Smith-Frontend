@@ -48,6 +48,12 @@
           </div>
         </div>
 
+        <!-- 프로젝트 제목 입력 필드 추가 -->
+        <div class="order-left">
+          <p class="price-title">프로젝트 제목:</p>
+          <input type="text" v-model="projectTitle" placeholder="프로젝트 제목을 입력하세요" />
+        </div>
+
         <!-- 주문 수량 및 예상 가격 영역 -->
         <div class="order-right">
           <div class="quantity-input">
@@ -86,7 +92,7 @@ import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
 import product1 from '@/assets/product1.webp'
 import product2 from '@/assets/product2.webp'
 import product3 from '@/assets/product3.webp'
-import emitter from '@/eventBus';  // mitt 이벤트 버스
+import emitter from '@/eventBus';
 
 export default {
   name: "ProductDetail",
@@ -118,6 +124,7 @@ export default {
       // 선택된 가공비 옵션 (기본값)
       selectedProcessingFee: '스플라이스 철판',
       quantity: 1,
+      projectTitle: "", // 사용자가 입력할 프로젝트 제목
       showEstimateModal: false,
       // 재료 목록
       materials: ["비규격", "중국산", "SM275", "SM355"],
@@ -176,12 +183,17 @@ export default {
         this.$router.push("/login");
         return;
       }
+      // 사용자가 프로젝트 제목을 입력하지 않았다면 경고 처리
+      if (!this.projectTitle.trim()) {
+        alert("프로젝트 제목을 입력해주세요.");
+        return;
+      }
       // 실제 주문 데이터를 백엔드에 POST 요청으로 전송
       const newOrder = {
         username: this.currentUserData.username,
         productName: this.product.name,
-        projectName: "새 프로젝트", // 실제 프로젝트명 입력값으로 대체 가능
-        status: "견적 전송 완료"
+        projectName: this.projectTitle, // 사용자가 입력한 프로젝트 제목 사용
+        status: "견적 요청 전송 완료"
       };
       const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
       try {
