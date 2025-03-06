@@ -23,12 +23,12 @@ export default {
     return {
       products: [
         {
-          name: "현장용소부재",
-          productId: "현장용소부재"
+          name: "현장용 소부재",
+          productId: "현장용 소부재"
         },
         {
-          name: "공장용소부재",
-          productId: "공장용소부재"
+          name: "공장용 소부재",
+          productId: "공장용 소부재"
         },
         {
           name: "브라켓",

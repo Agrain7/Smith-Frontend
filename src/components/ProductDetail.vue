@@ -2,7 +2,7 @@
   <div class="product-detail">
     <!-- 오른쪽 영역: 제품 정보 및 액션 영역 -->
     <div class="right-side">
-      <!-- 중앙 섹션: 제품명만 표시 (설명 제거) -->
+      <!-- 중앙 섹션: 제품명만 표시 -->
       <div class="middle-section">
         <h1 class="product-name">{{ product.name }}</h1>
       </div>
@@ -96,15 +96,15 @@ export default {
     return {
       // 제품 목록 (이미지 등은 그대로 유지)
       products: {
-        '현장용소부재': {
+        '현장용 소부재': {
           image: product1,
-          name: '현장용소부재',
-          description: '현장용소부재에 대한 상세 설명입니다.'
+          name: '현장용 소부재',
+          description: '현장용 소부재에 대한 상세 설명입니다.'
         },
-        '공장용소부재': {
+        '공장용 소부재': {
           image: product2,
-          name: '공장용소부재',
-          description: '공장용소부재에 대한 상세 설명입니다.'
+          name: '공장용 소부재',
+          description: '공장용 소부재에 대한 상세 설명입니다.'
         },
         '브라켓': {
           image: product3,
@@ -132,7 +132,7 @@ export default {
     // 제품 정보 (제품명만 사용)
     product() {
       const productId = this.$route.params.productId;
-      const baseProduct = this.products[productId] || this.products['현장용소부재'];
+      const baseProduct = this.products[productId] || this.products['현장용 소부재'];
       return baseProduct;
     },
     computedPrice() {
@@ -175,14 +175,14 @@ export default {
         this.$router.push("/login");
         return;
       }
-      // 견적 요청 제출 시 제품명과 (여기서는 예시로 "새 프로젝트" 사용) 프로젝트명을 담은 주문 데이터를 전송합니다.
+      // 견적 요청 제출 시 제품명과 예시 프로젝트명("새 프로젝트")을 포함한 주문 데이터를 전송
       const newOrder = {
         id: Date.now(), // 유니크 id
         productName: this.product.name,
-        projectName: "새 프로젝트", // 실제 프로젝트명 입력 필드가 있다면 해당 값으로 대체
+        projectName: "새 프로젝트", // 실제 입력값으로 대체 가능
         status: "견적 전송 완료"
       };
-      // 루트 인스턴스를 이벤트 버스로 사용하여 MyPage로 전달
+      // 이벤트 버스를 통해 MyPage로 전달 (실제 환경에서는 Vuex 등 사용 권장)
       this.$root.$emit('orderSubmitted', newOrder);
       this.showEstimateModal = true;
     }
