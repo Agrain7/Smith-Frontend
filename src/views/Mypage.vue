@@ -1,4 +1,3 @@
-<!-- frontend/src/views/Mypage.vue -->
 <template>
   <div class="mypage">
     <h1>마이 페이지</h1>
@@ -9,7 +8,7 @@
           <th>프로젝트명</th>
           <th>견적서 확인하기</th>
           <th>주문하기</th>
-          <th>기타</th>
+          <th>진행상황</th>
         </tr>
       </thead>
       <tbody>
@@ -22,7 +21,7 @@
           <td>
             <button @click="orderNow(order)">주문하기</button>
           </td>
-          <td>{{ order.notes }}</td>
+          <td>{{ order.status }}</td>
         </tr>
       </tbody>
     </table>
@@ -34,15 +33,25 @@ export default {
   name: "Mypage",
   data() {
     return {
-      // 샘플 주문 데이터; 실제 데이터는 API나 Vuex에서 받아오도록 수정
+      // 초기 샘플 데이터; 실제 데이터는 API나 Vuex에서 받아오도록 수정 가능
       orders: [
-        { id: 1, productName: "현장용소부재", projectName: "프로젝트 A", notes: "특별 할인 적용" },
-        { id: 2, productName: "공장용소부재", projectName: "프로젝트 B", notes: "추가 옵션 있음" },
-        { id: 3, productName: "브라켓", projectName: "프로젝트 C", notes: "배송 지연 중" }
+        { id: 1, productName: "현장용소부재", projectName: "프로젝트 A", status: "견적 전송 완료" },
+        { id: 2, productName: "공장용소부재", projectName: "프로젝트 B", status: "견적 전송 완료" },
+        { id: 3, productName: "브라켓", projectName: "프로젝트 C", status: "견적 전송 완료" }
       ]
     }
   },
+  created() {
+    // 이벤트 버스로 새로운 주문 데이터를 받음
+    this.$root.$on('orderSubmitted', this.addOrder);
+  },
+  beforeDestroy() {
+    this.$root.$off('orderSubmitted', this.addOrder);
+  },
   methods: {
+    addOrder(newOrder) {
+      this.orders.push(newOrder);
+    },
     viewEstimate(order) {
       alert(`제품 ${order.productName}의 견적서를 확인합니다.`);
     },

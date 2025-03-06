@@ -62,7 +62,7 @@
         </div>
       </div>
 
-      <!-- 견적 요청 버튼 영역 -->
+      <!-- 세부단가 견적요청 섹션 -->
       <div class="estimate-request">
         <button 
           class="estimate-button" 
@@ -175,6 +175,15 @@ export default {
         this.$router.push("/login");
         return;
       }
+      // 견적 요청 제출 시 제품명과 (여기서는 예시로 "새 프로젝트" 사용) 프로젝트명을 담은 주문 데이터를 전송합니다.
+      const newOrder = {
+        id: Date.now(), // 유니크 id
+        productName: this.product.name,
+        projectName: "새 프로젝트", // 실제 프로젝트명 입력 필드가 있다면 해당 값으로 대체
+        status: "견적 전송 완료"
+      };
+      // 루트 인스턴스를 이벤트 버스로 사용하여 MyPage로 전달
+      this.$root.$emit('orderSubmitted', newOrder);
       this.showEstimateModal = true;
     }
   }
@@ -224,14 +233,14 @@ export default {
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* 양쪽 섹션의 옵션 간격을 20px로 동일하게 */
+  gap: 20px;
 }
 
 /* 각 재료 그룹: 한 줄에 배치 */
 .material-group {
   display: flex;
   align-items: center;
-  gap: 20px; /* 재료명과 무게 옵션 사이 간격 */
+  gap: 20px;
 }
 .material-label {
   font-weight: bold;
@@ -241,7 +250,7 @@ export default {
 /* 무게 옵션들을 한 줄에 배치 */
 .weight-options {
   display: flex;
-  gap: 20px; /* 각 옵션 간격을 20px로 */
+  gap: 20px;
 }
 .weight-options label {
   font-size: 16px;
