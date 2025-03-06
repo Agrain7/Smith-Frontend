@@ -2,7 +2,7 @@
   <div class="product-detail">
     <!-- 오른쪽 영역: 제품 정보 및 액션 영역 -->
     <div class="right-side">
-      <!-- 중앙 섹션: 제품명만 표시 -->
+      <!-- 중앙 섹션: 제품명만 표시 (설명 제거) -->
       <div class="middle-section">
         <h1 class="product-name">{{ product.name }}</h1>
       </div>
@@ -18,10 +18,10 @@
               <div v-for="material in materials" :key="material" class="material-group">
                 <span class="material-label">{{ material }}</span>
                 <div class="weight-options">
-                  <!-- weightCategories 순서: 12~50t, 9t이하 -->
+                  <!-- 무게 카테고리 순서: 12~50t 먼저, 그 다음 9t이하 -->
                   <label v-for="weight in weightCategories" :key="material + '_' + weight">
-                    <input type="radio" 
-                           :value="material + '_' + weight" 
+                    <input type="radio"
+                           :value="material + '_' + weight"
                            v-model="selectedMaterialOption" />
                     <span>
                       {{ weight }} ({{ priceConfig[material][weight] }}원/kg)
@@ -33,7 +33,7 @@
           </div>
         </div>
 
-        <!-- 가공비 선택 영역 (변경 없음) -->
+        <!-- 오늘의 가공비 영역 -->
         <div class="order-left">
           <p class="price-title">오늘의 가공비:</p>
           <div class="processing-selection">
@@ -112,7 +112,7 @@ export default {
           description: '브라켓에 대한 상세 설명입니다.'
         }
       },
-      // 선택된 재료 옵션 (예: "SM275_12~50t")
+      // 선택된 재료 옵션: "재료_무게" 형식 (예: "SM275_12~50t")
       selectedMaterialOption: 'SM275_12~50t',
       // 선택된 가공비 옵션 (기본값)
       selectedProcessingFee: '스플라이스 철판',
@@ -120,7 +120,7 @@ export default {
       showEstimateModal: false,
       // 재료 목록
       materials: ["비규격", "중국산", "SM275", "SM355"],
-      // 무게 카테고리 순서: 12~50t가 먼저, 9t이하가 나중
+      // 무게 카테고리: 12~50t가 먼저, 9t이하가 나중
       weightCategories: ["12~50t", "9t이하"],
     }
   },
@@ -136,7 +136,7 @@ export default {
       return baseProduct;
     },
     computedPrice() {
-      // selectedMaterialOption 형식: "SM275_12~50t"
+      // selectedMaterialOption: "SM275_12~50t" 형식에서 분리
       const parts = this.selectedMaterialOption.split('_');
       const material = parts[0];
       const weight = parts[1];
@@ -221,27 +221,27 @@ export default {
 
 /* 재료 선택 및 가공비 선택 영역 */
 .material-selection, .processing-selection {
+  text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px; /* 양쪽 섹션의 옵션 간격을 20px로 동일하게 */
 }
 
 /* 각 재료 그룹: 한 줄에 배치 */
 .material-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 20px; /* 재료명과 무게 옵션 사이 간격 */
 }
-
-/* 재료 레이블 */
 .material-label {
   font-weight: bold;
+  font-size: 16px;
 }
 
 /* 무게 옵션들을 한 줄에 배치 */
 .weight-options {
   display: flex;
-  gap: 10px;
+  gap: 20px; /* 각 옵션 간격을 20px로 */
 }
 .weight-options label {
   font-size: 16px;
