@@ -1,6 +1,7 @@
 <template>
   <div class="modal-overlay" @click.self="close">
     <div class="modal-content">
+      <!-- 부재종류 표시 (현재 라우트의 productId 사용) -->
       <div class="product-type">
         부재종류: {{ productType }}
       </div>
@@ -9,7 +10,7 @@
         <!-- 프로젝트명 입력 -->
         <div class="form-group">
           <label>프로젝트명:</label>
-          <input type="text" v-model="localProjectName" placeholder="프로젝트명을 입력하세요" required />
+          <input type="text" v-model="form.projectName" placeholder="프로젝트명을 입력하세요" required />
         </div>
         <!-- 파일 업로드 (모든 파일 허용) -->
         <div class="form-group">
@@ -37,11 +38,6 @@ import axios from 'axios';
 export default {
   name: 'EstimateRequestModal',
   props: {
-    // v-model을 위해 modelValue prop 사용
-    modelValue: {
-      type: String,
-      default: ''
-    },
     userData: {
       type: Object,
       required: true
@@ -49,14 +45,15 @@ export default {
   },
   data() {
     return {
-      localProjectName: this.modelValue, // 부모와 동기화할 로컬 변수
       form: {
+        projectName: '',
         file: null
       },
-      uploadProgress: 0
+      uploadProgress: 0  // 업로드 진행률 (%)
     };
   },
   computed: {
+    // 현재 라우트 파라미터에서 부재종류(제품명)를 가져옵니다.
     productType() {
       return this.$route.params.productId || '';
     }
@@ -82,51 +79,65 @@ export default {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const formData = new FormData();
       formData.append('estimateFile', this.form.file);
-      formData.append('projectName', this.localProjectName);
+      formData.append('projectName', this.form.projectName);
       formData.append('productType', this.productType);
 
       try {
+        // 파일 업로드 (Axios로 진행률 추적)
         const uploadResponse = await axios.post(`${apiUrl}/api/upload-estimate`, formData, {
           onUploadProgress: progressEvent => {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             this.uploadProgress = percentCompleted;
           }
         });
-        const data = uploadResponse.data;
-        if (data.success) {
-          const payload = {
-            username: this.userData.username,
-            name: this.userData.name,
-            phone: this.userData.phone,
-            projectName: this.localProjectName,
-            productType: this.productType,
-            fileUrl: data.fileUrl,
-            fileName: data.fileName
-          };
-          const estimateRes = await axios.post(`${apiUrl}/api/estimate-request`, payload, {
-            headers: { 'Content-Type': 'application/json' }
-          });
-          const estimateData = estimateRes.data;
-          if (estimateData.success) {
-            alert("견적 요청이 제출되었습니다.");
-            // v-model 업데이트: 부모에 새 프로젝트명을 전달
-            this.$emit('update:modelValue', this.localProjectName);
-            this.close();
-          } else {
-            alert(estimateData.message || "견적 요청 제출에 실패했습니다.");
-          }
+        const uploadData = uploadResponse.data;
+        if (!uploadData.success) {
+          alert(uploadData.message || "파일 업로드에 실패했습니다.");
+          return;
+        }
+        // 견적 요청 제출 (파일 업로드 후)
+        const estimatePayload = {
+          username: this.userData.username,
+          name: this.userData.name,
+          phone: this.userData.phone,
+          projectName: this.form.projectName,
+          productType: this.productType,
+          fileUrl: uploadData.fileUrl,
+          fileName: uploadData.fileName
+        };
+        const estimateRes = await axios.post(`${apiUrl}/api/estimate-request`, estimatePayload, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const estimateData = estimateRes.data;
+        if (!estimateData.success) {
+          alert(estimateData.message || "견적 요청 제출에 실패했습니다.");
+          return;
+        }
+        // 주문 데이터도 함께 전송 (동일한 정보로 orders 엔드포인트 호출)
+        const orderPayload = {
+          username: this.userData.username,
+          productName: this.productType, // 라우트의 productId를 제품명으로 사용
+          projectName: this.form.projectName,
+          orderDetails: {
+            fileUrl: uploadData.fileUrl,
+            fileName: uploadData.fileName
+          },
+          status: "견적 요청 전송 완료"
+        };
+        const orderRes = await axios.post(`${apiUrl}/api/orders`, orderPayload, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const orderData = orderRes.data;
+        if (orderData.success) {
+          alert("견적 요청이 제출되었습니다.");
+          this.close();
         } else {
-          alert(data.message || "파일 업로드에 실패했습니다.");
+          alert(orderData.message || "주문 데이터 전송에 실패했습니다.");
         }
       } catch (err) {
-        console.error("파일 업로드 오류:", err);
-        alert("파일 업로드 중 오류 발생");
+        console.error("파일 업로드 또는 주문 전송 오류:", err);
+        alert("전송 중 오류 발생");
       }
-    }
-  },
-  watch: {
-    modelValue(newVal) {
-      this.localProjectName = newVal;
     }
   }
 };
