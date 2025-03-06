@@ -1,37 +1,35 @@
 <template>
   <div class="product-detail">
-    <!-- 왼쪽 영역: 이미지 제거 -->
-    
     <!-- 오른쪽 영역: 제품 정보 및 액션 영역 -->
     <div class="right-side">
-      <!-- 중앙 섹션: 제품명, 설명 -->
+      <!-- 중앙 섹션: 제품명만 표시 -->
       <div class="middle-section">
         <h1 class="product-name">{{ product.name }}</h1>
-        <p class="product-description">{{ product.description }}</p>
       </div>
 
-      <!-- 주문 정보 섹션 (두 그룹: 철판가격 선택 및 가공비 선택) -->
+      <!-- 주문 정보 섹션 -->
       <div class="order-info">
-        <!-- 재료 선택 영역: 오늘의 철판가격 -->
+        <!-- 오늘의 철판가격 영역 -->
         <div class="order-left">
           <p class="price-title">오늘의 철판가격:</p>
           <div class="material-selection">
-            <label>
-              <input type="radio" value="비규격" v-model="selectedMaterial" />
-              비규격 <span class="material-price">( {{ priceConfig["비규격"]["9t이하"] }}원/kg )</span>
-            </label>
-            <label>
-              <input type="radio" value="중국산" v-model="selectedMaterial" />
-              중국산 <span class="material-price">( {{ priceConfig["중국산"]["9t이하"] }}원/kg )</span>
-            </label>
-            <label>
-              <input type="radio" value="SM275" v-model="selectedMaterial" />
-              SM275 <span class="material-price">( {{ priceConfig["SM275"]["9t이하"] }}원/kg )</span>
-            </label>
-            <label>
-              <input type="radio" value="SM355" v-model="selectedMaterial" />
-              SM355 <span class="material-price">( {{ priceConfig["SM355"]["9t이하"] }}원/kg )</span>
-            </label>
+            <div class="material-options">
+              <!-- 반복: 각 재료 그룹 -->
+              <div v-for="material in materials" :key="material" class="material-group">
+                <span class="material-label">{{ material }}</span>
+                <div class="weight-options">
+                  <!-- 각 재료별 두 무게 카테고리 -->
+                  <label v-for="weight in weightCategories" :key="material + '_' + weight">
+                    <input type="radio" 
+                           :value="material + '_' + weight" 
+                           v-model="selectedMaterialOption" />
+                    <span>
+                      {{ weight }} ({{ priceConfig[material][weight] }}원/kg)
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -50,7 +48,7 @@
           </div>
         </div>
 
-        <!-- 오른쪽 영역: 주문수량 및 가격 -->
+        <!-- 주문 수량 및 예상 가격 영역 -->
         <div class="order-right">
           <div class="quantity-input">
             <span>주문수량 :</span>
@@ -75,7 +73,7 @@
       </div>
     </div>
 
-    <!-- 모달 컴포넌트 (로그인 상태라면 열림) -->
+    <!-- 모달 컴포넌트 (로그인 상태일 때 표시) -->
     <EstimateRequestModal 
       v-if="showEstimateModal" 
       :userData="currentUserData" 
@@ -96,7 +94,7 @@ export default {
   },
   data() {
     return {
-      // 제품 목록은 그대로 유지 (필요한 경우 업데이트)
+      // 제품 목록 (이미지 등은 그대로 유지)
       products: {
         '현장용소부재': {
           image: product1,
@@ -114,26 +112,34 @@ export default {
           description: '브라켓에 대한 상세 설명입니다.'
         }
       },
-      selectedMaterial: 'SM275',          // 재료 선택 (기본값)
-      selectedProcessingFee: '스플라이스 철판',  // 가공비 선택 (기본값)
+      // 재료 선택: material과 무게 카테고리 결합 (예: "SM275_9t이하")
+      selectedMaterialOption: 'SM275_9t이하',
+      // 가공비 선택: 기본값
+      selectedProcessingFee: '스플라이스 철판',
       quantity: 1,
       showEstimateModal: false,
+      // 반복용 배열
+      materials: ["비규격", "중국산", "SM275", "SM355"],
+      weightCategories: ["9t이하", "12~50t"],
     }
   },
   computed: {
-    // Vuex 스토어의 가격 설정 값을 가져옴
+    // Vuex 스토어에서 가격 설정 값을 가져옴
     priceConfig() {
       return this.$store.state.priceConfig;
     },
-    // 제품 정보는 그대로 사용 (이미지 제외)
+    // 제품 정보: 이미지 제외하고 제품명만 사용 (설명 제거)
     product() {
       const productId = this.$route.params.productId;
       const baseProduct = this.products[productId] || this.products['현장용소부재'];
       return baseProduct;
     },
     computedPrice() {
-      // 여기서는 기본적으로 '9t이하' 가격을 사용한다고 가정
-      const materialPrice = this.priceConfig[this.selectedMaterial]["9t이하"] || 0;
+      // selectedMaterialOption 형식: "SM275_9t이하"
+      const parts = this.selectedMaterialOption.split('_');
+      const material = parts[0];
+      const weight = parts[1];
+      const materialPrice = this.priceConfig[material][weight] || 0;
       const processingFee = this.priceConfig.processingFee[this.selectedProcessingFee] || 0;
       return (materialPrice + processingFee) * 1000 * this.quantity;
     },
@@ -184,8 +190,6 @@ export default {
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
 }
-/* 왼쪽 이미지 영역 제거하므로 .left-side 관련 스타일은 삭제 */
-
 /* 오른쪽 영역 전체 */
 .right-side {
   flex: 1;
@@ -193,8 +197,7 @@ export default {
   flex-direction: column;
   gap: 15px;
 }
-
-/* 중앙 섹션: 제품명, 설명 */
+/* 중앙 섹션: 제품명만 표시 (설명 제거) */
 .middle-section {
   text-align: center;
 }
@@ -203,11 +206,6 @@ export default {
   font-weight: bold;
   margin: 0;
 }
-.product-description {
-  font-size: 16px;
-  color: #555;
-}
-
 /* 주문 정보 섹션 */
 .order-info {
   display: flex;
@@ -226,15 +224,29 @@ export default {
   margin: 0 0 5px;
   text-align: left;
 }
-.material-selection label,
-.processing-selection label {
+/* 재료 선택 및 가공비 선택 영역 */
+.material-selection, .processing-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.material-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.material-label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.weight-options label {
   font-size: 16px;
   cursor: pointer;
-  margin-bottom: 5px;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 .material-price {
-  margin-left: 5px;
   font-size: 14px;
   color: #777;
 }
@@ -282,7 +294,6 @@ export default {
   color: #d9534f;
   margin: 0;
 }
-
 /* 견적 요청 버튼 영역 */
 .estimate-request {
   display: flex;
