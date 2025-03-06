@@ -91,17 +91,14 @@ export default {
     return {
       products: {
         '현장용 소부재': {
-          image: product1,
           name: '현장용 소부재',
           description: '현장용 소부재에 대한 상세 설명입니다.'
         },
         '공장용 소부재': {
-          image: product2,
           name: '공장용 소부재',
           description: '공장용 소부재에 대한 상세 설명입니다.'
         },
         '브라켓': {
-          image: product3,
           name: '브라켓',
           description: '브라켓에 대한 상세 설명입니다.'
         }
