@@ -73,7 +73,6 @@ button:focus-visible {
   }
 }
 
-
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -85,4 +84,22 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* 추가된 스타일 */
+
+/* 로스율 문구 스타일 */
+.loss-note {
+  font-size: 0.9em;
+  color: #555;
+  margin-top: 10px;
+}
+
+/* 가격 영역과 가공비 영역 사이의 구분선 - 양 끝단까지 꽉 차게 */
+.separator {
+  height: 20px;
+  background-color: #fff;
+  margin: 20px 0;
+  width: calc(100% + 40px); /* 좌우 패딩 보정: 부모가 20px이면 */
+  margin-left: -20px;
 }
