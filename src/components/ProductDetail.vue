@@ -118,7 +118,7 @@ export default {
       weightCategories: ["12~50t", "9t이하"],
       selectedProcessingFee: '스플라이스 철판',
       showEstimateModal: false,
-      // quantity는 개별 입력이 있으므로 사용하지 않음 (옵션별로 관리)
+      // quantity는 개별 입력으로 관리되므로 별도의 변수는 사용하지 않음
     }
   },
   computed: {
@@ -172,41 +172,14 @@ export default {
     }
   },
   methods: {
-    async handleEstimateRequest() {
+    handleEstimateRequest() {
       if (!this.isLoggedIn) {
         alert("로그인 후 사용하세요.");
         this.$router.push("/login");
         return;
       }
-      // 주문 데이터 생성 (여기서는 프로젝트 제목은 하드코딩 "새 프로젝트"로 처리)
-      const newOrder = {
-        username: this.currentUserData.username,
-        productName: this.product.name,
-        projectName: "새 프로젝트",
-        orderDetails: { ...this.orderQuantities },
-        status: "견적 요청 전송 완료"
-      };
-      const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
-      try {
-        const response = await fetch('https://smithapp-bbc6f2929f0b.herokuapp.com/api/orders', {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify(newOrder)
-        });
-        const data = await response.json();
-        if (response.ok) {
-          emitter.emit('orderSubmitted', data.order);
-          this.showEstimateModal = true;
-        } else {
-          alert(data.message || "주문 제출 실패");
-        }
-      } catch (error) {
-        console.error("주문 제출 중 오류:", error);
-        alert("서버와 통신 중 오류 발생");
-      }
+      // 단순히 모달만 띄우도록 수정 (주문 데이터 전송은 모달에서 처리)
+      this.showEstimateModal = true;
     }
   }
 };
@@ -275,7 +248,7 @@ export default {
 }
 
 .price-text {
-  flex: 1;  /* 가격 텍스트가 가능한 공간을 차지 */
+  flex: 1;
   font-size: 14px;
 }
 
@@ -283,8 +256,8 @@ export default {
 .price-display {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* 오른쪽 정렬 */
-  gap: 5px; /* 텍스트와 가격 사이의 간격 */
+  justify-content: flex-end;
+  gap: 5px;
   margin-top: 1px;
 }
 .expected-price {
@@ -328,7 +301,7 @@ export default {
 /* 입력 필드 스타일 */
 .price-table input[type="number"] {
   width: 60px;
-  font-size: 14px; /* 원하는 폰트 크기 */
+  font-size: 14px;
   text-align: center;
   margin: 0;
 }
@@ -339,5 +312,4 @@ export default {
   flex-direction: column;
   gap: 20px;
 }
-
 </style>
