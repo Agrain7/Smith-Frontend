@@ -215,7 +215,7 @@ export default {
 <style scoped>
 .product-detail {
   width: 100%;
-  max-width: 720px;
+  max-width: 1080px;
   margin: 20px auto;
   display: flex;
   gap: 20px;
@@ -327,6 +327,7 @@ export default {
 /* 입력 필드 스타일 */
 .price-table input[type="number"] {
   width: 60px;
+  font-size: 14px; /* 원하는 폰트 크기 */
   text-align: center;
   margin: 0;
 }
