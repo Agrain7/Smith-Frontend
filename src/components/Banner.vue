@@ -1,4 +1,3 @@
-<!-- frontend/src/components/Banner.vue -->
 <template>
   <div class="banner">
     <!-- 위측 영역 -->
@@ -46,47 +45,49 @@ export default {
   padding: 20px 0;
   box-sizing: border-box;
   background-color: #ddd;
+  transition: all 0.3s ease; /* 부드러운 크기 변화 효과 */
 }
 
-/* 위측 영역: 동일한 높이 지정 */
+/* 상단 영역: 부모를 relative로 설정 */
 .banner-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 300px;
+  position: relative;
   height: 60px;
   background-color: #ddd;
 }
 
-/* 아래측 영역: 동일한 높이 지정 */
+/* 하단 영역도 상단과 동일하게 relative로 설정 */
 .banner-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 300px;
-  margin-top: 20px;
+  position: relative;
   height: 60px;
   background-color: #ddd;
+  margin-top: 20px;
 }
 
-/* 가운데 영역: 내용은 없으며, 높이만 지정, 배경은 페이지 배경색과 동일 */
+/* 좌측, 우측 콘텐츠: 부모 기준 절대 위치 지정 */
+.left-content,
+.right-content {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* 좌측 콘텐츠: 중앙 기준에서 200px 왼쪽 */
+.left-content {
+  left: calc(50% - 200px);
+  text-align: left;
+}
+
+/* 우측 콘텐츠: 중앙 기준에서 200px 오른쪽 */
+.right-content {
+  right: calc(50% - 200px);
+  text-align: right;
+}
+
+/* 가운데 영역: 내용 없음, 높이만 지정 */
 .banner-middle {
   height: 20px;
   background-color: #fff;
   margin-top: 20px;
-}
-
-.left-content,
-.right-content {
-  flex: 1;
-}
-
-.left-content {
-  text-align: left;
-}
-
-.right-content {
-  text-align: right;
 }
 
 /* 기본 텍스트 스타일 */
@@ -95,12 +96,12 @@ export default {
   margin: 4px 0;
 }
 
-/* 왼쪽 영역 텍스트 */
+/* 왼쪽 텍스트 크기 */
 .left-content .text {
   font-size: 20px;
 }
 
-/* 오른쪽 영역 텍스트 */
+/* 오른쪽 텍스트 크기 */
 .right-content .text {
   font-size: 16px;
 }
@@ -108,7 +109,7 @@ export default {
 /* 다크 모드 설정 */
 @media (prefers-color-scheme: dark) {
   .banner-middle {
-    background-color: #333;
+    background-color: #000;
   }
   .banner-top,
   .banner-bottom {

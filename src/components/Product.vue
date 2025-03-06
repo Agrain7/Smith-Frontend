@@ -1,6 +1,7 @@
 <!-- frontend/src/components/Product.vue -->
 <template>
   <section class="product-section">
+    <h2 class="section-title">주문하기</h2>
     <div class="product-container">
       <div 
         class="product-card" 
@@ -46,10 +47,18 @@ export default {
 
 <style scoped>
 .product-section {
-  width: 1080px;
+  width: 100%;
+  max-width: 1080px;
   margin: 20px auto;
   padding: 20px;
   box-sizing: border-box;
+}
+
+.section-title {
+  text-align: left;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 .product-container {
