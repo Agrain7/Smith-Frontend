@@ -86,6 +86,7 @@ import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
 import product1 from '@/assets/product1.webp'
 import product2 from '@/assets/product2.webp'
 import product3 from '@/assets/product3.webp'
+import emitter from '@/eventBus'; // 이벤트 버스 가져오기
 
 export default {
   name: "ProductDetail",
@@ -175,15 +176,15 @@ export default {
         this.$router.push("/login");
         return;
       }
-      // 견적 요청 제출 시 제품명과 예시 프로젝트명("새 프로젝트")을 포함한 주문 데이터를 전송
+      // 견적 요청 제출 시 제품명과 예시 프로젝트명("새 프로젝트")을 포함한 주문 데이터를 생성
       const newOrder = {
         id: Date.now(), // 유니크 id
         productName: this.product.name,
-        projectName: "새 프로젝트", // 실제 입력값으로 대체 가능
+        projectName: "새 프로젝트", // 실제 프로젝트명 입력값으로 대체 가능
         status: "견적 전송 완료"
       };
-      // 이벤트 버스를 통해 MyPage로 전달 (실제 환경에서는 Vuex 등 사용 권장)
-      this.$root.$emit('orderSubmitted', newOrder);
+      // 이벤트 버스를 통해 주문 데이터를 발행
+      emitter.emit('orderSubmitted', newOrder);
       this.showEstimateModal = true;
     }
   }
@@ -249,9 +250,8 @@ export default {
 .material-options {
   display: flex;
   flex-direction: column; /* 각 재료 그룹을 세로로 나열 */
-  gap: 20px; /* 각 그룹 사이에 20px 간격 부여 */
+  gap: 20px; /* 그룹 사이 간격 */
 }
-
 
 /* 무게 옵션들을 한 줄에 배치 */
 .weight-options {

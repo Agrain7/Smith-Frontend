@@ -1,3 +1,4 @@
+<!-- frontend/src/views/Mypage.vue -->
 <template>
   <div class="mypage">
     <h1>마이 페이지</h1>
@@ -29,21 +30,23 @@
 </template>
 
 <script>
+import emitter from '@/eventBus';
+
 export default {
   name: "Mypage",
   data() {
     return {
-      orders: [] // 초기 샘플 데이터를 제거하고 빈 배열로 시작
+      orders: [] // 초기 주문 데이터는 빈 배열로 시작
     }
   },
   created() {
-    // 이벤트 버스를 통해 새로운 주문 데이터 수신 (실시간 업데이트)
-    this.$root.$on('orderSubmitted', this.addOrder);
+    // mitt 이벤트 버스에서 주문 데이터 수신
+    emitter.on('orderSubmitted', this.addOrder);
     // 로그인한 사용자 기준으로 백엔드에서 주문 데이터를 가져옵니다.
     this.fetchOrders();
   },
-  beforeDestroy() {
-    this.$root.$off('orderSubmitted', this.addOrder);
+  beforeUnmount() {
+    emitter.off('orderSubmitted', this.addOrder);
   },
   methods: {
     async fetchOrders() {

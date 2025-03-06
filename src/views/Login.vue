@@ -32,13 +32,13 @@
           />
         </div>
 
-        <!-- 자동로그인 체크박스 -->
+        <!-- 자동로그인 체크박스
         <div class="form-group auto-login">
           <label>
             <input type="checkbox" v-model="autoLogin" />
             자동로그인
           </label>
-        </div>
+        </div> -->
 
         <!-- 로그인, 회원가입 버튼 그룹 -->
         <div class="button-group">
