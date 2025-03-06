@@ -1,5 +1,6 @@
 <template>
   <div class="product-detail">
+    <!-- 오른쪽 영역: 제품 정보 및 액션 영역 -->
     <div class="right-side">
       <!-- 중앙 섹션: 제품명만 표시 -->
       <div class="middle-section">
@@ -22,33 +23,34 @@
               <tr v-for="weight in weightCategories" :key="weight">
                 <td>{{ weight }}</td>
                 <td v-for="material in materials" :key="material + '_' + weight">
-                  {{ priceConfig[material][weight] }}원/kg
-                  <input type="number"
-                         v-model.number="orderQuantities[material + '_' + weight]"
-                         min="0"
-                         class="quantity-input-field" />
+                  <div class="price-input-container">
+                    <span class="price-text">({{ priceConfig[material][weight] }}원/kg)</span>
+                    <input type="number"
+                           v-model.number="orderQuantities[material + '_' + weight]"
+                           min="0" />
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- 오늘의 가공비 영역 (변경 없음) -->
+        <!-- 오늘의 가공비 영역 -->
         <div class="order-left">
           <p class="price-title">오늘의 가공비:</p>
           <div class="processing-selection">
             <label>
               <input type="radio" value="스플라이스 철판" v-model="selectedProcessingFee" />
-              스플라이스 철판 <span class="material-price">( {{ priceConfig.processingFee["스플라이스 철판"] }}원/kg )</span>
+              스플라이스 철판 <span class="material-price">({{ priceConfig.processingFee["스플라이스 철판"] }}원/kg)</span>
             </label>
             <label>
               <input type="radio" value="일반 철판" v-model="selectedProcessingFee" />
-              일반 철판 <span class="material-price">( {{ priceConfig.processingFee["일반 철판"] }}원/kg )</span>
+              일반 철판 <span class="material-price">({{ priceConfig.processingFee["일반 철판"] }}원/kg)</span>
             </label>
           </div>
         </div>
 
-        <!-- 주문 수량 총합 및 예상 가격 영역 -->
+        <!-- 주문 수량 및 예상 가격 영역 (전체 옵션 수량과 가공비를 반영한 예상 가격 계산) -->
         <div class="order-right">
           <div class="price-display">
             <p class="expected-price">예상가격:</p>
@@ -78,9 +80,6 @@
 
 <script>
 import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
-import product1 from '@/assets/product1.webp'
-import product2 from '@/assets/product2.webp'
-import product3 from '@/assets/product3.webp'
 import emitter from '@/eventBus';
 
 export default {
@@ -107,23 +106,22 @@ export default {
           description: '브라켓에 대한 상세 설명입니다.'
         }
       },
-      // 각 옵션별 주문수량을 관리하는 객체
+      // 각 옵션별 주문수량을 관리하는 객체 (기본값: SM275 옵션만 1000, 나머지는 0)
       orderQuantities: {
-        "비규격_12~50t": 1, // 기본: 비규격 12~50t = 1
+        "비규격_12~50t": 0,
         "비규격_9t이하": 0,
         "중국산_12~50t": 0,
         "중국산_9t이하": 0,
-        "SM275_12~50t": 0,
-        "SM275_9t이하": 0,
+        "SM275_12~50t": 1000,
+        "SM275_9t이하": 500,
         "SM355_12~50t": 0,
         "SM355_9t이하": 0
       },
-      // 재료 목록과 무게 카테고리
       materials: ["비규격", "중국산", "SM275", "SM355"],
       weightCategories: ["12~50t", "9t이하"],
-      // 선택된 가공비 옵션 (기본값)
       selectedProcessingFee: '스플라이스 철판',
       showEstimateModal: false,
+      // quantity는 개별 입력이 있으므로 사용하지 않음 (옵션별로 관리)
     }
   },
   computed: {
@@ -136,16 +134,21 @@ export default {
       return baseProduct;
     },
     computedPrice() {
-      let sum = 0;
+      // 각 옵션별 (가격 * 주문수량) 합계
+      let optionsSum = 0;
+      let totalQty = 0;
       for (const material of this.materials) {
         for (const weight of this.weightCategories) {
           const key = material + '_' + weight;
           const qty = this.orderQuantities[key] || 0;
           const price = this.priceConfig[material][weight] || 0;
-          sum += price * qty;
+          optionsSum += price * qty;
+          totalQty += qty;
         }
       }
-      return sum * 1000;
+      // 최종 계산: (옵션 합계 + (전체 수량 * 가공비))
+      const processingFee = this.priceConfig.processingFee[this.selectedProcessingFee] || 0;
+      return (optionsSum + (totalQty * processingFee));
     },
     computedPriceFormatted() {
       return this.computedPrice.toLocaleString('ko-KR');
@@ -178,11 +181,11 @@ export default {
         this.$router.push("/login");
         return;
       }
-      // 주문 데이터에 옵션별 주문수량 정보를 포함하여 전송
+      // 주문 데이터 생성 (여기서는 프로젝트 제목은 하드코딩 "새 프로젝트"로 처리)
       const newOrder = {
         username: this.currentUserData.username,
         productName: this.product.name,
-        // orderDetails로 각 옵션의 주문수량 정보를 보냅니다.
+        projectName: "새 프로젝트",
         orderDetails: { ...this.orderQuantities },
         status: "견적 요청 전송 완료"
       };
@@ -266,6 +269,18 @@ export default {
   margin-bottom: 5px;
 }
 
+/* 컨테이너로 가격 텍스트와 입력창을 가로 배치 */
+.price-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.price-text {
+  font-size: 16px;
+}
+
 /* 예상 가격 영역 */
 .price-display {
   text-align: center;
@@ -312,7 +327,7 @@ export default {
 /* 입력 필드 스타일 */
 .price-table input[type="number"] {
   width: 60px;
-  margin-top: 5px;
   text-align: center;
+  margin: 0;
 }
 </style>
