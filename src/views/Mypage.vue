@@ -37,7 +37,7 @@ export default {
     }
   },
   created() {
-    // 이벤트 버스로 받은 주문 데이터 추가 (실시간 업데이트)
+    // 이벤트 버스를 통해 새로운 주문 데이터 수신 (실시간 업데이트)
     this.$root.$on('orderSubmitted', this.addOrder);
     // 로그인한 사용자 기준으로 백엔드에서 주문 데이터를 가져옵니다.
     this.fetchOrders();
@@ -50,7 +50,7 @@ export default {
       const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
       if (!token) return;
       
-      // 토큰에서 사용자 아이디를 추출 (예: username)
+      // JWT 토큰에서 사용자 아이디(username) 추출
       let username = "";
       try {
         const payload = token.split('.')[1];
