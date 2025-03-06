@@ -134,6 +134,12 @@ export default {
   transition: background-color 0.3s;
 }
 
+.orders-table button:disabled {
+  background-color: #cccccc; /* 회색 배경 */
+  opacity: 0.6;              /* 투명도 조절 */
+  cursor: not-allowed;       /* 클릭 불가 커서 */
+}
+
 .orders-table button:hover {
   background-color: #0056b3;
 }
