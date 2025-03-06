@@ -54,30 +54,67 @@
       </div>
 
       <!-- 오늘의 가격 관리 탭 -->
-      <div v-if="currentTab === 'prices'" class="price-management">
-        <h2>오늘의 가격 관리</h2>
-        <div class="form-group">
-          <label>SM275 가격 (원/kg):</label>
-          <input type="number" v-model.number="localPriceConfig.sm275" />
-        </div>
-        <div class="form-group">
-          <label>SM355 가격 (원/kg):</label>
-          <input type="number" v-model.number="localPriceConfig.sm355" />
-        </div>
-        <div class="form-group">
-          <label>현장용소부재 가공비 (원/kg):</label>
-          <input type="number" v-model.number="localPriceConfig.processingFee['현장용소부재']" />
-        </div>
-        <div class="form-group">
-          <label>공장용소부재 가공비 (원/kg):</label>
-          <input type="number" v-model.number="localPriceConfig.processingFee['공장용소부재']" />
-        </div>
-        <div class="form-group">
-          <label>브라켓 가공비 (원/kg):</label>
-          <input type="number" v-model.number="localPriceConfig.processingFee['브라켓']" />
-        </div>
-        <button @click="savePriceConfig">저장</button>
-      </div>
+<div v-if="currentTab === 'prices'" class="price-management">
+  <h2>오늘의 가격 관리</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>항목</th>
+        <th>9t이하 (원/kg)</th>
+        <th>12~50t (원/kg)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>비규격</td>
+        <td>
+          <input type="number" v-model.number="localPriceConfig['비규격']['9t이하']" />
+        </td>
+        <td>
+          <input type="number" v-model.number="localPriceConfig['비규격']['12~50t']" />
+        </td>
+      </tr>
+      <tr>
+        <td>중국산</td>
+        <td>
+          <input type="number" v-model.number="localPriceConfig['중국산']['9t이하']" />
+        </td>
+        <td>
+          <input type="number" v-model.number="localPriceConfig['중국산']['12~50t']" />
+        </td>
+      </tr>
+      <tr>
+        <td>SM275</td>
+        <td>
+          <input type="number" v-model.number="localPriceConfig['SM275']['9t이하']" />
+        </td>
+        <td>
+          <input type="number" v-model.number="localPriceConfig['SM275']['12~50t']" />
+        </td>
+      </tr>
+      <tr>
+        <td>SM355</td>
+        <td>
+          <input type="number" v-model.number="localPriceConfig['SM355']['9t이하']" />
+        </td>
+        <td>
+          <input type="number" v-model.number="localPriceConfig['SM355']['12~50t']" />
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- 기존 가공비 입력 영역 -->
+  <div class="form-group">
+  <label>스플라이스 철판 가공비 (원/kg):</label>
+  <input type="number" v-model.number="localPriceConfig.processingFee['스플라이스 철판']" />
+</div>
+<div class="form-group">
+  <label>일반 철판 가공비 (원/kg):</label>
+  <input type="number" v-model.number="localPriceConfig.processingFee['일반 철판']" />
+</div>
+  <button @click="savePriceConfig">저장</button>
+</div>
+
 
       <!-- 프로젝트 및 견적서 전송 탭 -->
       <div v-if="currentTab === 'estimates'">
@@ -163,22 +200,35 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 export default {
   name: "AdminPanel",
   data() {
-    return {
-      currentTab: 'members', // 기본 탭: 회원관리
-      users: [],
-      estimates: [],
-      // 로컬 복사본: 백엔드에서 불러온 가격 설정을 저장
-      localPriceConfig: {
-        sm275: 1000,
-        sm355: 1200,
-        processingFee: {
-          "현장용소부재": 199,
-          "공장용소부재": 188,
-          "브라켓": 177
-        }
+  return {
+    currentTab: 'members', // 기본 탭: 회원관리
+    users: [],
+    estimates: [],
+    localPriceConfig: {
+      "비규격": {
+        "9t이하": 800,
+        "12~50t": 1000
+      },
+      "중국산": {
+        "9t이하": 900,
+        "12~50t": 1100
+      },
+      "SM275": {
+        "9t이하": 1000,
+        "12~50t": 1200
+      },
+      "SM355": {
+        "9t이하": 1100,
+        "12~50t": 1300
+      },
+      processingFee: {
+    "스플라이스 철판": 180,
+    "일반 철판": 160
       }
-    };
-  },
+    }
+  };
+},
+
   computed: {
     pendingEstimates() {
       return this.estimates.filter(estimate => !estimate.completed);

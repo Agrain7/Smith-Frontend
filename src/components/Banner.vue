@@ -1,28 +1,51 @@
 <template>
   <div class="banner">
-    <!-- 위측 영역 -->
-    <div class="banner-top">
-      <div class="left-content">
-        <p class="text">오늘의 철강가격</p>
-      </div>
-      <div class="right-content">
-        <p class="text">SM275 : {{ priceConfig.sm275 }}원/kg</p>
-        <p class="text">SM355 : {{ priceConfig.sm355 }}원/kg</p>
-      </div>
+    <!-- 제목 영역 -->
+    <div class="banner-header">
+      <h2>오늘의 철판가격</h2>
     </div>
-    <!-- 가운데 영역 (빈 공간, 페이지 배경색과 동일) -->
-    <div class="banner-middle"></div>
-    <!-- 아래측 영역 -->
-    <div class="banner-bottom">
-      <div class="left-content">
-        <p class="text">오늘의 가공비</p>
-      </div>
-      <div class="right-content">
-        <p class="text">현장용소부재 : {{ priceConfig.processingFee['현장용소부재'] }}원/kg</p>
-        <p class="text">공장용소부재 : {{ priceConfig.processingFee['공장용소부재'] }}원/kg</p>
-        <p class="text">브라켓 : {{ priceConfig.processingFee['브라켓'] }}원/kg</p>
-      </div>
-    </div>
+    <!-- 가격 표 영역 -->
+    <table class="price-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>비규격</th>
+          <th>중국산</th>
+          <th>SM275</th>
+          <th>SM355</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>9t이하</td>
+          <td>{{ priceConfig["비규격"]["9t이하"] }}원/kg</td>
+          <td>{{ priceConfig["중국산"]["9t이하"] }}원/kg</td>
+          <td>{{ priceConfig["SM275"]["9t이하"] }}원/kg</td>
+          <td>{{ priceConfig["SM355"]["9t이하"] }}원/kg</td>
+        </tr>
+        <tr>
+          <td>12~50t</td>
+          <td>{{ priceConfig["비규격"]["12~50t"] }}원/kg</td>
+          <td>{{ priceConfig["중국산"]["12~50t"] }}원/kg</td>
+          <td>{{ priceConfig["SM275"]["12~50t"] }}원/kg</td>
+          <td>{{ priceConfig["SM355"]["12~50t"] }}원/kg</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="loss-note">※ 로스율 7% 적용</p>
+
+    <!-- 구분 영역 -->
+<div class="separator"></div>
+
+    <!-- 가공비 영역 -->
+    <div class="processing-fee">
+  <h3>오늘의 가공비</h3>
+  <!-- 스플라이스 철판을 두 번 보여주려면, 같은 값을 두 번 출력 -->
+  <p>스플라이스 철판: {{ priceConfig.processingFee['스플라이스 철판'] }}원/kg</p>
+  <p>일반 철판: {{ priceConfig.processingFee['일반 철판'] }}원/kg</p>
+  <p class="loss-note">※ 중량기준 : 사각환산중량(◪)</p>
+</div>
+
   </div>
 </template>
 
@@ -42,82 +65,37 @@ export default {
   width: 100%;
   max-width: 1080px;
   margin: 0 auto;
-  padding: 20px 0;
+  padding: 20px;
   box-sizing: border-box;
   background-color: #ddd;
-  transition: all 0.3s ease; /* 부드러운 크기 변화 효과 */
+  transition: all 0.3s ease;
 }
-
-/* 상단 영역: 부모를 relative로 설정 */
-.banner-top {
-  position: relative;
-  height: 60px;
-  background-color: #ddd;
+.banner-header {
+  text-align: center;
+  margin-bottom: 20px;
 }
-
-/* 하단 영역도 상단과 동일하게 relative로 설정 */
-.banner-bottom {
-  position: relative;
-  height: 60px;
-  background-color: #ddd;
-  margin-top: 20px;
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
-
-/* 좌측, 우측 콘텐츠: 부모 기준 절대 위치 지정 */
-.left-content,
-.right-content {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+.price-table th,
+.price-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
 }
-
-/* 좌측 콘텐츠: 중앙 기준에서 200px 왼쪽 */
-.left-content {
-  left: calc(50% - 200px);
-  text-align: left;
+.processing-fee {
+  text-align: center;
 }
-
-/* 우측 콘텐츠: 중앙 기준에서 200px 오른쪽 */
-.right-content {
-  right: calc(50% - 200px);
-  text-align: right;
+.processing-fee h3 {
+  margin-bottom: 10px;
 }
-
-/* 가운데 영역: 내용 없음, 높이만 지정 */
-.banner-middle {
-  height: 20px;
-  background-color: #fff;
-  margin-top: 20px;
-}
-
-/* 기본 텍스트 스타일 */
-.text {
-  font-weight: bold;
-  margin: 4px 0;
-}
-
-/* 왼쪽 텍스트 크기 */
-.left-content .text {
-  font-size: 20px;
-}
-
-/* 오른쪽 텍스트 크기 */
-.right-content .text {
-  font-size: 16px;
-}
-
-/* 다크 모드 설정 */
-@media (prefers-color-scheme: dark) {
-  .banner-middle {
-    background-color: #000;
-  }
-  .banner-top,
-  .banner-bottom {
-    background-color: #444;
-  }
-  .left-content .text,
-  .right-content .text {
-    color: #fff;
-  }
+.separator {
+  height: 40px;           /* 원하는 높이로 조정 */
+  background-color: #fff; /* 부모 배경과 대비되는 색상으로 설정 (예: 흰색) */
+  margin: 20px 0;         /* 위아래 여백 */
+  width: calc(100% + 40px); /* 좌우 padding 20px씩 보정 */
+  margin-left: -20px;   
 }
 </style>

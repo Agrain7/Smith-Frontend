@@ -1,4 +1,3 @@
-// frontend/src/store/index.js
 import { createStore } from 'vuex';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -6,14 +5,27 @@ const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 export default createStore({
   state: {
     token: localStorage.getItem('token') || sessionStorage.getItem('token') || null,
-    // 오늘의 가격 관련 설정 (기본값)
+    // 오늘의 가격 관련 설정 (기본값, Banner.vue에서 사용하는 형식)
     priceConfig: {
-      sm275: 1000,
-      sm355: 1200,
+      "비규격": {
+        "9t이하": 800,
+        "12~50t": 1000
+      },
+      "중국산": {
+        "9t이하": 900,
+        "12~50t": 1100
+      },
+      "SM275": {
+        "9t이하": 1000,
+        "12~50t": 1200
+      },
+      "SM355": {
+        "9t이하": 1100,
+        "12~50t": 1300
+      },
       processingFee: {
-        "현장용소부재": 199,
-        "공장용소부재": 188,
-        "브라켓": 177
+        "스플라이스 철판": 180,
+        "일반 철판": 160
       }
     }
   },
