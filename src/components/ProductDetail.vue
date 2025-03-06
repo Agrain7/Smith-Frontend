@@ -145,7 +145,7 @@ export default {
       }
       // 최종 계산: (옵션 합계 + (전체 수량 * 가공비))
       const processingFee = this.priceConfig.processingFee[this.selectedProcessingFee] || 0;
-      return (optionsSum + (totalQty * processingFee));
+      return (optionsSum*1.05 + (totalQty * processingFee));
     },
     computedPriceFormatted() {
       return this.computedPrice.toLocaleString('ko-KR');
@@ -244,6 +244,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-direction: row-reverse;
   width: 100%;
 }
 
