@@ -270,18 +270,21 @@ export default {
 .price-input-container {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 10px;
 }
 
 .price-text {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 /* 예상 가격 영역 */
 .price-display {
-  text-align: center;
-  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  gap: 5px; /* 텍스트와 가격 사이의 간격 */
+  margin-top: 1px;
 }
 .expected-price {
   font-size: 18px;
