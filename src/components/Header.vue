@@ -34,18 +34,20 @@ export default {
   },
   methods: {
     handleMypage() {
-      if (this.isLoggedIn) {
-        this.$router.push("/mypage");
-      } else {
-        this.$router.push("/login");
-      }
+      // if (this.isLoggedIn) {
+      //   this.$router.push("/mypage");
+      // } else {
+      //   this.$router.push("/login");
+      // }
+      this.$router.push("/mypage"); // !!!
     },
     handleBasket() {
-      if (this.isLoggedIn) {
-        this.$router.push("/basket");
-      } else {
-        this.$router.push("/login");
-      }
+      // if (this.isLoggedIn) {
+      //   this.$router.push("/basket");
+      // } else {
+      //   this.$router.push("/login");
+      // }
+      this.$router.push("/basket"); // !!!
     },
   },
 };

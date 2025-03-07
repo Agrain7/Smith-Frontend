@@ -15,15 +15,19 @@
         <tr v-for="order in orders" :key="order._id">
           <td>{{ order.productName }}</td>
           <td>{{ order.projectName }}</td>
-          <td>
+          <!-- <td>
             <button @click="viewEstimate(order)" :disabled="order.status !== '견적서 전송 완료'">
-  견적서 확인하기
-</button>
+              견적서 확인하기
+            </button>
+          </td> -->
+          <td>
+            <span v-if="order.status === '견적서 전송 완료'">E-mail 에서 견적서를 확인하세요.</span>
+            <span v-else>견적 요청 확인중 ...</span>
           </td>
           <td>
             <button @click="orderNow(order)" :disabled="order.status !== '견적서 확인 완료'">
-  주문하기
-</button>
+              주문하기
+            </button>
           </td>
           <td>{{ order.status }}</td>
         </tr>
@@ -76,7 +80,10 @@ export default {
         });
         const data = await response.json();
         if (response.ok && data.orders) {
-          this.orders = data.orders;
+          this.orders = data.orders.map(order => ({
+            ...order,
+            isSent: order.isSent || false // 견적서 전송 여부 (기본값 false)
+          }));
         } else {
           console.error("주문 데이터 불러오기 오류:", data);
         }

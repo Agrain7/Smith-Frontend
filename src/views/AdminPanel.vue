@@ -125,7 +125,7 @@
               <th>아이디</th>
               <th>이름</th>
               <th>전화번호</th>
-              <th>프로젝트명</th>
+              <th>E-mail</th>
               <th>견적요청 파일</th>
               <th>견적서 전송하기</th>
               <th>프로젝트 완료</th>
@@ -336,12 +336,40 @@ export default {
         });
       }
     },
-    sendEstimate(estimate) {
-      swalWithCenter.fire({
-        icon: 'info',
-        title: '알림',
-        text: '견적서 전송 기능은 현재 미구현 상태입니다.'
-      });
+    async sendEstimate(estimate) {
+      // swalWithCenter.fire({
+      //   icon: 'info',
+      //   title: '알림',
+      //   text: '견적서 전송 기능은 현재 미구현 상태입니다.'
+      // });
+      try {
+        const res = await fetch(`${API_URL}/api/estimate-request/${estimate._id}/send`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await res.json();
+        if (data.success) {
+          estimate.isSent = true; // 상태 변경
+          await swalWithCenter.fire({
+            icon: 'success',
+            title: '전송 완료',
+            text: '견적서가 성공적으로 전송되었습니다.'
+          });
+        } else {
+          await swalWithCenter.fire({
+            icon: 'error',
+            title: '오류',
+            text: '견적서 전송에 실패했습니다.'
+          });
+        }
+      } catch (err) {
+        console.error("견적서 전송 오류:", err);
+        swalWithCenter.fire({
+          icon: 'error',
+          title: '오류',
+          text: '견적서 전송 중 오류 발생'
+        });
+      }
     },
     async completeProject(estimate) {
       const result = await swalWithCenter.fire({
