@@ -69,7 +69,7 @@
       v-if="showEstimateModal" 
       :userData="currentUserData" 
       @close="showEstimateModal = false" />
-  </div>
+  </div> 
 </template>
 
 <script>
@@ -102,6 +102,26 @@ export default {
     totalFormattedPrice() {
       const total = this.selectedItems.reduce((sum, item) => sum + parseInt(item.price.replace(/[^0-9]/g, ""), 10), 0);
       return total.toLocaleString() + " 원";
+    },
+    isLoggedIn() {
+      return this.$store.getters.isLoggedIn;
+    },
+    currentUserData() {
+      const token = this.$store.state.token || localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) return {};
+      try {
+        const payload = token.split('.')[1];
+        const decoded = JSON.parse(decodeURIComponent(escape(window.atob(payload))));
+        return {
+          username: decoded.username || '',
+          name: decoded.name || '',
+          phone: decoded.phone || '',
+          email: decoded.email || ''
+        };
+      } catch (error) {
+        console.error("토큰 파싱 오류:", error);
+        return {};
+      }
     }
   },
   methods: {
