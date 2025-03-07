@@ -54,12 +54,32 @@
       </div>
     </div>
 
+    <!-- 세부단가 견적요청 섹션 -->
+    <div class="estimate-request">
+      <button 
+        class="estimate-button"
+        :class="{ disabled: !isLoggedIn }"
+        @click="handleEstimateRequest">
+        세부단가 견적요청
+      </button>
+    </div>
+
+    <!-- 모달 컴포넌트 (로그인 상태일 때 표시) -->
+    <EstimateRequestModal 
+      v-if="showEstimateModal" 
+      :userData="currentUserData" 
+      @close="showEstimateModal = false" />
   </div>
 </template>
 
 <script>
+import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
+
 export default {
   name: "SmithPage",
+  components: {
+    EstimateRequestModal
+  },
   data() {
     return {
       priceTable: {
@@ -85,6 +105,15 @@ export default {
     }
   },
   methods: {
+    handleEstimateRequest() {
+      if (!this.isLoggedIn) {
+        alert("로그인 후 사용하세요.");
+        this.$router.push("/login");
+        return;
+      }
+      // 단순히 모달만 띄우도록 수정 (주문 데이터 전송은 모달에서 처리)
+      this.showEstimateModal = true;
+    },
     calculatePrice() {
       if (!this.selectedSteelType || !this.selectedCategory || !this.weight) return 0;
       const unitPrice = this.priceTable[this.selectedSteelType]?.[this.selectedCategory] || 0;
@@ -214,6 +243,34 @@ select, input {
   margin-top: 10px;
   width: 500px;
 }
+/* 견적 요청 버튼 영역 */
+.estimate-request {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+.estimate-button {
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px dashed #28a745;
+  background-color: transparent;
+  color: #28a745;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+.estimate-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.estimate-button:hover {
+  background-color: #28a745;
+  color: #fff;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   /* 모바일 환경 (태블릿 & 스마트폰) */
