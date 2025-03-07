@@ -6,6 +6,7 @@ import Signup from '@/views/Signup.vue'
 import Product from '@/components/Product.vue'
 import Purchase from '@/components/Purchase.vue'
 import ProductDetail from '@/components/ProductDetail.vue'
+import newProductDetail from '@/components/newProductDetail.vue'
 import Estimate from '@/components/Estimate.vue';
 import Basket from '@/views/Basket.vue'
 import Mypage from '@/views/Mypage.vue'
@@ -15,7 +16,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Product
+    component: newProductDetail // !!! component: Product / null
   },
   {
     path: '/product/:productId',

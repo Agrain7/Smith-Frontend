@@ -2,15 +2,15 @@
   <div class="modal-overlay" @click.self="close">
     <div class="modal-content">
       <!-- 부재종류 표시 (현재 라우트의 productId 사용) -->
-      <div class="product-type">
+      <!-- <div class="product-type">
         부재종류: {{ productType }}
-      </div>
+      </div> -->
       <h2>견적 요청 제출</h2>
       <form @submit.prevent="submitEstimate">
         <!-- 프로젝트명 입력 -->
         <div class="form-group">
-          <label>프로젝트명:</label>
-          <input type="text" v-model="form.projectName" placeholder="프로젝트명을 입력하세요" required />
+          <label>E-mail 주소 :</label>
+          <input type="text" v-model="form.projectName" placeholder="견적서를 수신받을 E-mail 주소를 입력하세요." required />
         </div>
         <!-- 파일 업로드 (모든 파일 허용) -->
         <div class="form-group">
@@ -162,6 +162,7 @@ export default {
   max-width: 500px;
   width: 100%;
   border-radius: 8px;
+  /* text-align: left; */ /* 전체 폼 내부 텍스트를 좌측 정렬 */
 }
 .product-type {
   font-size: 16px;
@@ -178,6 +179,7 @@ h2 {
   display: block;
   font-weight: bold;
   margin-bottom: 5px;
+  text-align: left; /* 좌측 정렬 */
 }
 .form-group input {
   width: 100%;
