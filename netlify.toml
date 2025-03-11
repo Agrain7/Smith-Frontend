@@ -1,13 +1,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "
-      default-src 'self'; 
-      connect-src 'self' https://smithapp-bbc6f2929f0b.herokuapp.com;
-      style-src 'self' 'unsafe-inline'; 
-      script-src 'self' 'unsafe-eval' 'unsafe-inline'; 
-      img-src 'self' data: https: blob:;
-      "
+      Content-Security-Policy = "default-src 'self'; img-src 'self' data: https: blob:; connect-src 'self' https://smithapp-bbc6f2929f0b.herokuapp.com"
     
 [[redirects]]
   from = "/*"
