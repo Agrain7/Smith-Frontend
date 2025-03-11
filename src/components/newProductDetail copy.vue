@@ -1,9 +1,9 @@
 <!-- newProductDetail.vue -->
 <template>
   <div class="container">
-    <h2>소부재 가격을 확인하세요</h2>
-
+    
     <!-- 소부재 가격 선택 -->
+    <h2>소부재 가격을 확인하세요</h2>
     <div class="input-box">
       <div class="row">
         <fieldset>
@@ -29,7 +29,7 @@
 
         <fieldset>
           <legend>중량(kg)</legend>
-          <input type="number" v-model.number="weight" placeholder="중량 입력 (kg)">
+          <input type="number" v-model.number="weight" placeholder="중량 입력 (kg)" @input="calculatePrice">
         </fieldset>
 
         <fieldset>
@@ -44,19 +44,14 @@
 
     <!-- 선택한 옵션 결과 -->
     <div class="result-container">
-      <div v-for="(item, index) in formattedItems" :key="index" class="result-box">
-        <p class="item-info">
-          {{ item.steelType }} | {{ item.category }} | {{ item.formattedWeight  }}kg
-        </p>
-        <p class="item-price">
-          {{ item.price }}
-        </p>
+      <div v-for="(item, index) in selectedItems" :key="index" class="result-box">
+        <p>{{ item.steelType }} | {{ item.category }} | {{ item.weight }}kg | {{ item.price }}</p>
         <button class="cancel-button" @click="removeItem(index)">취소</button>
       </div>
       
       <div v-if="selectedItems.length > 0" class="divider"></div>
       <div v-if="selectedItems.length > 0" class="total-sum">
-        <p><strong>합계금액(VAT별도) : </strong> {{ totalFormattedPrice }}</p>
+        <p><strong>합계금액(VAT별도):</strong> {{ totalFormattedPrice }}</p>
       </div>
     </div>
     
@@ -67,7 +62,7 @@
         class="estimate-button"
         :class="{ disabled: !isLoggedIn }"
         @click="handleEstimateRequest">
-        견적요청
+        세부단가 견적요청
       </button>
     </div>
 
@@ -75,39 +70,27 @@
       <button 
         class="estimate-button"
         :class="{ disabled: !isLoggedIn }"
-        @click="handleEstimateCheck">
+        @click="handleEstimateRequest">
         견적서 확인
       </button>
     </div>
 
 
-    <!-- 세부단가 견적요청 모달 (로그인 상태일 때 표시) -->
-    <newEstimateRequestModal 
-        v-if="isRequestModalOpen && selectedItems.length > 0" 
-      :isOpen="isRequestModalOpen"
+    <!-- 모달 컴포넌트 (로그인 상태일 때 표시) -->
+    <EstimateRequestModal 
+      v-if="showEstimateModal" 
       :userData="currentUserData" 
-      :quotationItems="selectedItems" 
-      @close="isRequestModalOpen = false" />
-    <!-- 견적서 확인 모달 (로그인 상태일 때 표시) -->
-    <newEstimateCheckModal 
-      v-if="isCheckModalOpen  && selectedItems.length > 0" 
-      :isOpen="isCheckModalOpen"
-      :userData="currentUserData" 
-      @close="isCheckModalOpen  = false"
-    />  
-
+      @close="showEstimateModal = false" />
   </div> 
 </template>
   
 <script>
-  import newEstimateRequestModal from '@/components/newEstimateRequestModal.vue'
-  import newEstimateCheckModal from '@/components/newEstimateCheckModal.vue'
+  import EstimateRequestModal from '@/components/EstimateRequestModal.vue'
   
   export default {
-    name: "NewProductDetail",
+    name: "SmithPage",
     components: {
-      newEstimateRequestModal,
-      newEstimateCheckModal
+      EstimateRequestModal
     },
     data() {
       return {
@@ -120,19 +103,13 @@
         },
         selectedSteelType: "SS275",
         selectedCategory: "12t~50t",
-        weight: null,
-        selectedItems: [],
-        ProcessingFee: 180,
-        isRequestModalOpen: false,  // "세부단가 견적요청" 모달 상태
-        isCheckModalOpen: false,    // "견적서 확인" 모달 상태
+        weight: 0,
+        selectedItems: []
       };
     },
     computed: {
       formattedPrice() {
-        if (!this.selectedSteelType || !this.selectedCategory || !this.weight) return "0 원";
-        const unitPrice = this.priceTable[this.selectedSteelType]?.[this.selectedCategory] || 0;
-        const totalPrice = Math.round((this.weight * 1.05 * unitPrice) + (this.weight * this.ProcessingFee));
-        return `${totalPrice.toLocaleString()} 원`;
+        return this.calculatePrice().toLocaleString() + " 원";
       },
       totalFormattedPrice() {
         const total = this.selectedItems.reduce((sum, item) => sum + parseInt(item.price.replace(/[^0-9]/g, ""), 10), 0);
@@ -157,12 +134,6 @@
           console.error("토큰 파싱 오류:", error);
           return {};
         }
-      },
-      formattedItems() {
-        return this.selectedItems.map(item => ({
-          ...item,
-          formattedWeight: item.weight.toLocaleString()   // ✅ 천단위 콤마 추가
-        }));
       }
     },
     methods: {
@@ -172,36 +143,27 @@
           this.$router.push("/login");
           return;
         }
-        if (this.selectedItems.length === 0) {
-          alert("견적 요청할 항목이 없습니다."); // 추가된 항목이 없으면 알림
-          return;
-        }
-        this.isRequestModalOpen  = true;
+        // 단순히 모달만 띄우도록 수정 (주문 데이터 전송은 모달에서 처리)
+        this.showEstimateModal = true;
       },
-      handleEstimateCheck() {
-        if (!this.isLoggedIn) {
-          alert("로그인 후 사용하세요.");
-          this.$router.push("/login");
-          return;
-        }
-        if (this.selectedItems.length === 0) {
-          alert("견적 요청할 항목이 없습니다."); // 추가된 항목이 없으면 알림
-          return;
-        }
-        this.isCheckModalOpen = true;
+      calculatePrice() {
+        if (!this.selectedSteelType || !this.selectedCategory || !this.weight) return 0;
+        const unitPrice = this.priceTable[this.selectedSteelType]?.[this.selectedCategory] || 0;
+        return Math.round((this.weight * 1.05 * unitPrice) + (this.weight * 180));
       },
       addPriceItem() {
         if (!this.selectedSteelType || !this.selectedCategory || !this.weight) {
           alert("모든 항목을 선택해 주세요.");
           return;
         }
+  
+        const price = this.formattedPrice;
         this.selectedItems.push({
           steelType: this.selectedSteelType,
           category: this.selectedCategory,
           weight: this.weight,
-          price: this.formattedPrice
+          price: price
         });
-        this.weight = null;
       },
       removeItem(index) {
         this.selectedItems.splice(index, 1);
@@ -209,125 +171,106 @@
     }
   };
 </script>
-
-
+  
 <style scoped>
-  /* ✅ 기본 컨테이너 */
   .container {
-    width: 70%;
-    max-width: 1080px;
+    width: 100%;
+    max-width: 1912px;
     margin: auto;
     padding: 20px;
-    margin-top: 30px;
+    
   }
-  .container h2 {
-    font-size: 20px;
-    text-align: center;
-  }
-
-  /* ✅ 입력 박스 (웹 & 모바일 공통) */
   .input-box {
     width: 100%;
+    max-width: 1000px;
     border: 2px solid black;
+    display: inline-block;
     padding: 30px;
     border-radius: 30px;
-    box-sizing: border-box;
   }
-
-  /* ✅ 입력 필드 row (웹에서는 가로 정렬) */
   .row {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; /* 요소들이 왼쪽 정렬되도록 설정 */
     align-items: center;
-    gap: 15px;
-    flex-wrap: nowrap; /* 모바일에서는 변경 */
+    gap: 10px;
+    width: 100%;
+    flex-wrap: nowrap; /* 강제로 한 줄에 유지 */
   }
-
-  /* ✅ fieldset 기본 스타일 */
   fieldset {
+    flex: 1; /* 모든 fieldset이 동일한 너비를 가지도록 설정 */
+    min-width: 150px; /* 최소 너비 설정 */
+    width: 100%;
     border: none;
-    padding: 5px;
+    padding: 10px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 10px;
-    width: 100%;
   }
+  /* 각 fieldset의 너비를 개별적으로 설정 */
   fieldset:nth-child(1) { /* 첫 번째 fieldset (강종) */
-    flex-basis: 20%;
-    min-width: 100px;
+    flex-basis: calc(20% - 10px);
+    min-width: 150px;
   }
   fieldset:nth-child(2) { /* 두 번째 fieldset (구분) */
-    flex-basis: 20%;
-    min-width: 100px;
+    flex-basis: calc(20% - 10px);
+    min-width: 150px;
   }
   fieldset:nth-child(3) { /* 세 번째 fieldset (중량) */
-    flex-basis: 20%;
-    min-width: 100px;
+    flex-basis: calc(20% - 10px);
+    min-width: 150px;
   }
   fieldset:nth-child(4) { /* 네 번째 fieldset (금액) */
-    flex-basis: 40%;
+    flex-basis: calc(23% - 10px);
     min-width: 200px;
   }
-
-  /* ✅ legend 스타일 */
   legend {
     font-size: 15px;
     font-weight: bold;
     text-align: center;
   }
-  fieldset:nth-child(4) legend {
-    padding-right: 32%;
-  }
-
-  /* ✅ select, input 기본 스타일 */
   select, input {
     width: 100%;
-    height: 30px;
     padding: 5px;
-    font-size: 14px;
-    text-align: center;
-    box-sizing: border-box;
-  }
-
-  /* ✅ 금액 입력 필드 & 버튼 */
-  .price-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
-  }
-  .price {
-    flex: 3;
-    color: red;
-    font-weight: bold;
     font-size: 16px;
     text-align: center;
+  }
+  .price-container {
     width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .price {
+    width: 70%;
+    color: red;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    width: 140px;
   }
   .check-price {
-    flex: 1;
-    height: 30px;
+    width: 30%;
     padding: 5px 10px;
     background-color: #007BFF;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 14px;
   }
   .check-price:hover {
     background-color: #0056b3;
   }
-
-  /* ✅ 결과 리스트 */
   .result-container {
-    margin: 20px 0;
+    margin: 0; /* 기존 마진 제거 */
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-end; /* 우측 정렬 */
     text-align: right;
+    width: 100%;
   }
   .result-box {
     display: flex;
@@ -337,18 +280,9 @@
     padding: 10px;
     border-bottom: 1px solid #ddd;
   }
-  .result-box .item-info {
-    flex-grow: 1;
-    text-align: left;
-  }
-  .result-box .item-price {
-    text-align: right;
-    min-width: 100px;
-    margin-right: 20px;
-  }
   .cancel-button {
+    margin-left: 10px;
     background: red;
-    width: 60px;
     color: white;
     border: none;
     padding: 5px 10px;
@@ -368,7 +302,7 @@
     width: 500px;
   }
 
-  /* ✅ 견적 요청 버튼 */
+  /* 견적 요청 버튼 영역 */
   .estimate-request {
     margin-top: 20px;
     display: flex;
@@ -395,75 +329,73 @@
     background-color: #28a745;
     color: #fff;
   }
-
-  /* ✅ 📌 반응형 디자인 (모바일 스타일 적용) */
+  
+  /* 반응형 디자인 */
   @media (max-width: 768px) {
-    /* 📌 컨테이너 기본 조정 */
+    /* 모바일 환경 (태블릿 & 스마트폰) */
     .container {
-      width: 90%;
+      max-width: 100%;
       padding: 10px;
-      align-items: center;
-    }
-    .container h2 {
-      font-size: 18px;
     }
 
-    /* 📌 입력 박스 크기 조정 */
+    /* 입력 박스 크기 조정 */
     .input-box {
-      padding: 15px;
+      width: 90%;
+      padding: 20px;
       border-radius: 15px;
     }
 
-    /* 📌 row는 세로 정렬 */
+    /* 선택 항목을 세로로 배치 */
     .row {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 10px;
-    }
-
-    /* 📌 fieldset은 가득 차게 */
-    fieldset {
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-    }
-    fieldset:nth-child(4) legend {
-      padding-right: 5%;
-    }
-
-    /* 📌 input, select 크기 조정 */
-    select, input {
-      width: 100%;
-      font-size: 16px;
-    }
-
-    /* 📌 price-container 조정 */
-    .price-container {
-      flex-direction: row;
+      flex-direction: column; /* 가로 → 세로 배치 변경 */
       align-items: center;
+      gap: 15px;
+    }
+
+    fieldset {
+      width: 75%;
+    }
+
+    select {
+      width: 100%;
+      font-size: 16px; /* 가독성 증가 */
+    }
+
+    input {
+      width: 97%;
+      font-size: 16px; /* 가독성 증가 */
+    }
+
+    .price-container {
       width: 100%;
     }
     .price {
       width: 100%;
     }
+    .chech-price {
+      width: 100%;
+    }
+
     .check-price {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       font-size: 16px;
     }
 
-    /* 📌 결과 박스 중앙 정렬 */
+    /* 결과 박스 정렬 */
     .result-container {
-      align-items: center;
-      width: 100%;
+      align-items: center; /* 모바일에서 중앙 정렬 */
+      padding-right: 0; /* 기존 우측 패딩 제거 */
     }
+
     .result-box {
       width: 90%;
       text-align: center;
     }
+
     .total-sum {
       width: 90%;
-      text-align: right;
+      text-align: center;
     }
   }
 </style>

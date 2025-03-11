@@ -1,13 +1,19 @@
+<!-- [frontend] index.html -->
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
-    <meta charset="UTF-8" />
-    <!-- CSP 메타 태그: style-src 'self' 'unsafe-inline' 추가 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://localhost:5000 https://*.s3.amazonaws.com https://smithapp-bbc6f2929f0b.herokuapp.com; style-src 'self' 'unsafe-inline';">
-    <link rel="icon" type="image/svg+xml" href="/steel.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self'; 
+      connect-src 'self' http://localhost:5000 https://*.s3.amazonaws.com https://smithapp-bbc6f2929f0b.herokuapp.com; 
+      style-src 'self' 'unsafe-inline';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline';">
+    <meta name="description" content="SMITH | 쉽고 빠른 현장 부재 구매는 SMITH">
+    
     <title>SMITH | 쉽고 빠른 현장 부재 구매는 SMITH</title>
-    <!-- 외부 CSS 파일 링크 -->
+    
+    <link rel="icon" type="image/svg+xml" href="/steel.svg">
     <link rel="stylesheet" href="/src/style.css">
   </head>
   <body>

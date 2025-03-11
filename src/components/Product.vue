@@ -48,7 +48,7 @@ export default {
 <style scoped>
 .product-section {
   width: 100%;
-  max-width: 1080px;
+  max-width: 1912px;
   margin: 20px auto;
   padding: 20px;
   box-sizing: border-box;

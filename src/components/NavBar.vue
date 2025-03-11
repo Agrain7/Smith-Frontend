@@ -69,7 +69,7 @@ export default {
 <style scoped>
 .top-nav-bar {
   width: 100%;
-  max-width: 1080px;
+  max-width: 1912px;
   margin: 0 auto;
   padding: 5px 20px;
   box-sizing: border-box;

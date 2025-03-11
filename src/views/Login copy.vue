@@ -75,9 +75,10 @@ export default {
             autoLogin: this.autoLogin,
           }),
         });
-        
         const data = await response.json();
         if (response.ok) {
+          console.log("로그인 성공:", data);
+          // Vuex 스토어의 login 액션을 통해 토큰 저장
           await this.$store.dispatch("login", {
             username: this.username,
             password: this.password,

@@ -10,6 +10,7 @@ export default defineConfig({
     }
   },
   server: {
+    port: 5173, // 개발 서버 포트
     proxy: {
       '/api': {
         target: 'http://localhost:5000',  // 백엔드 서버 주소

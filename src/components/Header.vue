@@ -56,7 +56,7 @@ export default {
 <style scoped>
 .header-container {
   width: 100%;
-  max-width: 1080px;
+  max-width: 1912px;
   margin: 0 auto;
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;

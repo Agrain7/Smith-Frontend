@@ -188,7 +188,7 @@ export default {
 <style scoped>
 .product-detail {
   width: 100%;
-  max-width: 1080px;
+  max-width: 1912px;
   margin: 20px auto;
   display: flex;
   gap: 20px;

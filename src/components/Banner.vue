@@ -65,7 +65,7 @@ export default {
 <style scoped>
 .banner {
   width: 100%;
-  max-width: 1080px;
+  max-width: 1912px;
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;

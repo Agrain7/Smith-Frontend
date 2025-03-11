@@ -1,122 +1,61 @@
-<!-- frontend/src/views/Signup.vue -->
 <template>
   <div class="signup-page">
     <div class="signup-container">
-      <!-- 로고 이미지 -->
-      <img src="@/assets/logo.png" alt="Logo" class="logo" />
-      
-      <!-- 제목: 작고 왼쪽 정렬 -->
-      <h2 class="title">회원정보를 입력해주세요.</h2>
-      
+      <div class="logo">
+        <img src="@/assets/logo.png" alt="Smith 로고" />
+      </div>
+      <h2>회원가입</h2>
+
       <!-- 회원가입 폼 -->
       <form @submit.prevent="signup">
-        <!-- 아이디 입력 -->
-        <div class="form-group">
-          <input
-            type="text"
-            v-model="form.username"
-            placeholder="아이디"
-            required
-          />
+        <div class="input-group">
+          <label for="name">이름</label>
+          <input type="text" id="name" v-model="form.name" placeholder="이름을 입력하세요" required />
         </div>
 
-        <!-- 비밀번호 입력 -->
-        <div class="form-group">
-          <input
-            type="password"
-            v-model="form.password"
-            placeholder="비밀번호"
-            required
-          />
+        <div class="input-group">
+          <label for="username">아이디</label>
+          <input type="text" id="username" v-model="form.username" placeholder="아이디를 입력하세요" required />
         </div>
 
-        <!-- 비밀번호 확인 -->
-        <div class="form-group">
-          <input
-            type="password"
-            v-model="form.passwordConfirm"
-            placeholder="비밀번호 확인"
-            required
-          />
+        <div class="input-group">
+          <label for="password">비밀번호</label>
+          <input type="password" id="password" v-model="form.password" placeholder="비밀번호를 입력하세요" required />
         </div>
 
-        <!-- 이름 입력 -->
-        <div class="form-group">
-          <input
-            type="text"
-            v-model="form.name"
-            placeholder="이름"
-            required
-          />
+        <div class="input-group">
+          <label for="confirmPassword">비밀번호 확인</label>
+          <input type="password" id="confirmPassword" v-model="form.passwordConfirm" placeholder="비밀번호를 다시 입력하세요" required />
         </div>
 
-        <!-- 휴대폰번호 입력 -->
-        <div class="form-group">
-          <input
-            type="tel"
-            v-model="form.phone"
-            placeholder="휴대폰번호"
-            required
-          />
+        <div class="input-group">
+          <label for="email">이메일</label>
+          <input type="email" id="email" v-model="form.email" placeholder="이메일을 입력하세요" required />
         </div>
 
-        <!-- 체크박스 -->
-        <div class="checkbox-row">
-          <label class="checkbox-label">
-            <input type="checkbox" v-model="form.agree" />
-            모두 확인하였으며 동의합니다.
-          </label>
+        <div class="input-group">
+          <label for="phone">휴대폰 번호</label>
+          <input type="tel" id="phone" v-model="form.phone" placeholder="휴대폰 번호를 입력하세요" required />
         </div>
 
-        <!-- 약관창 -->
+        <!-- 약관 동의 -->
         <div class="terms-container">
-          <h3>약관</h3>
-          <div class="terms-content">
-            <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: inherit; border: none; padding: 0; margin: 0;">
-제1조 (목적)
-이 약관은 (주)이 필(이하 “회사”라 함)이 제공하는 온라인 서비스(이하 “서비스”라 함)를 이용함에 있어 회사와 이용자의 권리·의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+          <label class="terms-title">약관</label>
+          <div class="terms-box">
+            <p><strong>제1조 (목적)</strong><br> 이 약관은 (주)이 필(이하 “회사”라 함)이 제공하는 온라인 서비스(이하 “서비스”라 함)를 이용함에 있어 회사와 이용자의 권리·의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.</p>
+            <p><strong>제2조 (약관의 효력 및 변경)</strong><br> 1. 본 약관은 회원이 서비스에 가입할 때 “동의함” 버튼을 클릭함으로써 효력이 발생합니다.<br> 2. 회사는 관련 법령에 위배되지 않는 범위에서 본 약관을 개정할 수 있으며, 약관이 개정될 경우 서비스 내 공지사항 또는 회원 이메일을 통해 통지합니다.</p>
+          </div>
 
-제2조 (약관의 효력 및 변경)
-1. 본 약관은 회원이 서비스에 가입할 때 “동의함” 버튼을 클릭함으로써 효력이 발생합니다.
-2. 회사는 관련 법령에 위배되지 않는 범위에서 본 약관을 개정할 수 있으며, 약관이 개정될 경우 서비스 내 공지사항 또는 회원 이메일을 통해 통지합니다.
-
-제3조 (회원가입)
-1. 회원가입은 본 약관의 내용에 동의한 후 회사가 정한 가입 양식에 따라 신청하여 승인을 받음으로써 완료됩니다.
-2. 회사는 다음 각 호의 경우 회원가입 신청을 거부하거나 취소할 수 있습니다.
-   - 타인의 명의를 도용한 경우
-   - 허위의 정보를 기재한 경우
-   - 기타 회사가 정한 회원가입 요건에 미비된 경우
-
-제4조 (개인정보의 수집 및 이용)
-1. 회사는 회원가입 시 필요한 최소한의 개인정보(예: 이름, 이메일, 휴대전화번호 등)를 수집합니다.
-2. 수집된 개인정보는 회원 식별, 서비스 제공, 본인확인, 회원 관리 등을 위해 사용되며, 관련 법령에 따라 안전하게 관리됩니다.
-3. 회원은 언제든지 개인정보 제공에 동의 철회 및 열람, 수정, 삭제를 요청할 수 있습니다.
-
-제5조 (회원의 의무)
-1. 회원은 본 약관 및 관련 법령을 준수하여야 하며, 기타 회사의 업무에 방해가 되는 행위를 해서는 안 됩니다.
-2. 회원은 자신의 아이디 및 비밀번호를 안전하게 관리할 책임이 있으며, 이를 타인에게 이용하게 해서는 안 됩니다.
-
-제6조 (서비스 이용)
-1. 회사는 회원에게 다음과 같은 서비스를 제공합니다.
-   - 회원 정보 관리
-   - 기타 회사가 정하는 온라인 서비스
-2. 서비스 이용 중 발생하는 문제에 대해 회사는 관련 법령에 따라 책임을 집니다.
-
-제7조 (면책조항)
-1. 회사는 천재지변, 전쟁, 기타 불가항력적인 사유로 인한 서비스 제공의 지연 또는 중단에 대하여 책임을 지지 않습니다.
-2. 회사는 회원 상호간 또는 회원과 제3자 간에 서비스를 매개로 발생한 분쟁에 대해서는 책임을 지지 않습니다.
-
-제8조 (분쟁의 해결)
-본 약관과 관련하여 발생한 분쟁은 회사의 본사 소재지를 관할하는 법원을 제1심 관할 법원으로 합니다.
-            </pre>
+          <div class="agree-box">
+            <input type="checkbox" id="agree" v-model="form.agree" />
+            <label for="agree">모두 확인하였으며 동의합니다.</label>
           </div>
         </div>
 
-        <!-- 가입 버튼 -->
-        <div class="button-group">
-          <button type="submit" class="signup-button" :disabled="!form.agree">
-            동의하고 가입하기
-          </button>
+        <!-- 버튼 -->
+        <div class="button-container">
+          <button type="submit" class="btn-signup" :disabled="!form.agree">회원가입</button>
+          <button type="button" class="btn-cancel" @click="cancelSignup">취소</button>
         </div>
       </form>
     </div>
@@ -134,6 +73,7 @@ export default {
         passwordConfirm: "",
         name: "",
         phone: "",
+        email: "",
         agree: false,
       },
     };
@@ -157,6 +97,7 @@ export default {
             password: this.form.password,
             name: this.form.name,
             phone: this.form.phone,
+            email: this.form.email,
           }),
         });
         const data = await response.json();
@@ -172,118 +113,116 @@ export default {
         alert("서버와 통신 중 오류 발생");
       }
     },
-  },
+    cancelSignup() {
+      this.$router.push("/login"); // 로그인 페이지로 이동
+    }
+  }
 };
 </script>
 
 <style scoped>
+/* ===== 회원가입 페이지 전체 스타일 ===== */
 .signup-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: transparent;
+  /* height: 100vh; */
+  background-color: #f5f5f5;
+  margin: 0;
 }
 
-.signup-container {
-  width: 100%;
-  max-width: 400px;
-  padding: 30px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-}
-
-.logo {
+.logo img {
+  width: 180px;
   display: block;
-  max-width: 200px;
-  margin: 0 auto 20px;
+  margin: 0 auto 25px;
 }
 
-.title {
+/* ===== 회원가입 컨테이너 ===== */
+.signup-container {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 420px;
+  text-align: center;
+}
+
+/* ===== 입력 필드 스타일 ===== */
+.input-group {
+  margin-top: 10px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+input {
+  width: calc(100% - 20px);
+  padding: 14px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
   font-size: 16px;
-  font-weight: normal;
+  background-color: #f9f9f9;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ===== 약관 동의 스타일 ===== */
+.terms-container {
+  margin-top: 20px;
   text-align: left;
-  margin-bottom: 20px;
 }
 
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group input {
-  width: 100%;
+.terms-box {
+  width: calc(100% - 20px);
+  height: 150px;
+  overflow-y: scroll;
+  border: 1px solid #ddd;
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
   font-size: 14px;
+  background: #f9f9f9;
+  margin: 0 auto;
 }
 
-/* 체크박스 행 */
-.checkbox-row {
-  text-align: left;
-  margin-bottom: 15px;
-}
-
-.checkbox-label {
-  font-size: 14px;
+.agree-box {
   display: flex;
   align-items: center;
-}
-
-.checkbox-label input {
-  margin-right: 5px;
-}
-
-/* 약관창 */
-.terms-container {
-  text-align: left;
-  margin-top: 20px;
-}
-
-.terms-container h3 {
-  margin: 0 0 10px;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.terms-content {
-  height: 200px;
-  overflow-y: scroll;
-  border: 1px solid #ccc;
-  padding: 10px;
-  font-size: 12px;
-  color: #555;
-  background-color: #f9f9f9;
-  box-sizing: border-box;
-}
-
-/* 가입 버튼 행 */
-.button-group {
-  margin-top: 20px;
-}
-
-.signup-button {
+  justify-content: flex-start;
+  gap: 8px;
   width: 100%;
-  padding: 10px;
+  padding-left: 5px;
+  margin-top: 5px;
+}
+
+.agree-box input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== 버튼 스타일 ===== */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn-signup,
+.btn-cancel {
+  padding: 14px;
+  border-radius: 8px;
+  width: 48%;
   font-size: 16px;
   font-weight: bold;
-  border: none;
-  border-radius: 4px;
-  background-color: #007bff;
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s;
 }
 
-.signup-button:disabled {
-  background-color: #ccc;
+/* ===== 비활성화된 버튼 스타일 ===== */
+.btn-signup:disabled {
+  background: #ccc;
   cursor: not-allowed;
-}
-
-.signup-button:hover:not(:disabled) {
-  background-color: #0056b3;
 }
 </style>
