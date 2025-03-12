@@ -500,6 +500,8 @@ body {
 .quotation-page {
     width: 794px;
     min-height: 1120px; /* 🔹 최소 A4 크기 유지 */
+    min-height: 1120px;
+    max-height: 100vh; /* ✅ 모바일에서 화면 크기를 벗어나지 않도록 설정 */
     background: white;
     display: flex;
     flex-direction: column;
@@ -513,6 +515,7 @@ body {
 
 .quotation-container {
     width: 90%;
+    max-width: 100%; /* ✅ 화면 크기보다 커지지 않도록 설정 */
     border: 2px solid black;
     margin: auto;
     padding: 20px;
@@ -757,5 +760,12 @@ body {
     margin-top: 5px;
     margin-bottom: 10px;
 }
+
+@media (max-width: 786px) {
+    .quotation-page {
+        transform: scale(0.5); /* ✅ 작은 화면에서 자동 축소 */
+    }
+}
+
 </style>
   
