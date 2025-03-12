@@ -52,10 +52,22 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
 }
+
+/* #app 전체에 세로 중앙 정렬 적용 */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  justify-content: center;
+}
+
+/* 데스크탑 스타일 */
 .desktop-style {
   max-width: 1912px;
   margin: auto;
 }
+
+/* 모바일 스타일 */
 .mobile-style {
   width: 100%;
   padding: 10px;

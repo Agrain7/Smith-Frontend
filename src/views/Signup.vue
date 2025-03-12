@@ -1,8 +1,10 @@
 <template>
   <div class="signup-page">
     <div class="signup-container">
-      <div class="logo">
-        <img src="@/assets/logo.png" alt="Smith 로고" />
+      <div class="logo">       
+        <router-link to="/">
+          <img src="@/assets/logo.png" alt="Logo" class="logo" />
+        </router-link>
       </div>
       <h2>회원가입</h2>
 

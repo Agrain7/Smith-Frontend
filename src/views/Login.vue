@@ -4,7 +4,10 @@
   <div class="login-page">
     <div class="login-container">
       <!-- 로고 이미지 -->
-      <img src="@/assets/logo.png" alt="Logo" class="logo" />
+      <router-link to="/">
+        <img src="@/assets/logo.png" alt="Logo" class="logo" />
+      </router-link>
+      
 
       <!-- 로그인 폼 -->
       <form @submit.prevent="login">

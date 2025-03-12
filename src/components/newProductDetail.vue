@@ -67,7 +67,7 @@
         class="estimate-button"
         :class="{ disabled: !isLoggedIn }"
         @click="handleEstimateRequest">
-        견적요청
+        견적서 확인
       </button>
     </div>
 
@@ -76,7 +76,7 @@
         class="estimate-button"
         :class="{ disabled: !isLoggedIn }"
         @click="handleEstimateCheck">
-        견적서 확인
+        견적요청
       </button>
     </div>
 
@@ -90,7 +90,7 @@
       @close="isRequestModalOpen = false" />
     <!-- 견적서 확인 모달 (로그인 상태일 때 표시) -->
     <newEstimateCheckModal 
-      v-if="isCheckModalOpen  && selectedItems.length > 0" 
+      v-if="isCheckModalOpen" 
       :isOpen="isCheckModalOpen"
       :userData="currentUserData" 
       @close="isCheckModalOpen  = false"
@@ -184,15 +184,15 @@
           this.$router.push("/login");
           return;
         }
-        if (this.selectedItems.length === 0) {
-          alert("견적 요청할 항목이 없습니다."); // 추가된 항목이 없으면 알림
-          return;
-        }
+        // if (this.selectedItems.length === 0) {
+        //   alert("견적 요청할 항목이 없습니다."); // 추가된 항목이 없으면 알림
+        //   return;
+        // }
         this.isCheckModalOpen = true;
       },
       addPriceItem() {
         if (!this.selectedSteelType || !this.selectedCategory || !this.weight) {
-          alert("모든 항목을 선택해 주세요.");
+          alert("값을 입력해주세요.");
           return;
         }
         this.selectedItems.push({

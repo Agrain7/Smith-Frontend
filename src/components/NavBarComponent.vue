@@ -15,7 +15,7 @@
           <li v-if="!isLoggedIn"><router-link to="/login" class="nav-btn highlight">로그인</router-link></li>
           <li v-if="!isLoggedIn"><router-link to="/signup" class="nav-btn highlight">회원가입</router-link></li>
           <li v-if="isLoggedIn"><span>{{ userName }}님</span></li>
-          <li v-if="isLoggedIn"><router-link to="/mypage" class="nav-btn">마이페이지</router-link></li>
+          <!-- <li v-if="isLoggedIn"><router-link to="/mypage" class="nav-btn">마이페이지</router-link></li> -->
           <!-- <li v-if="isLoggedIn"><router-link to="/basket" class="nav-btn">구매내역</router-link></li> -->
           <li v-if="isLoggedIn"><a href="#" @click.prevent="logout" class="nav-btn logout">로그아웃</a></li>
           <li v-if="isAdmin"><router-link to="/admin" class="nav-btn">관리자 페이지</router-link></li>

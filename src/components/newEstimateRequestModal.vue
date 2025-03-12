@@ -13,94 +13,190 @@
             </div>
 
             <!-- 견적서 모달 -->
-            <div v-else ref="quotationModal" class="quotation-page">
+            <div v-else class="quotation-contents">
+                <div ref="quotationModal" class="quotation-page">
 
-                <div class="quotation-container">
+                    <div class="quotation-container">
 
-                    <!-- 견적서 제목 -->
-                    <h1>見積書</h1> 
+
+                        <!-- 헤더: 문서번호 -->
+                        <div class="header-info">
+                            <div class="document-number" id="document-number">{{ docNumber }}</div>
+                        </div>
+                        <!-- 제목 -->
+                        <div class="title">견 적 서</div>
+                        <!-- 정보 섹션 -->
+                        <div class="info-section">
+                            <!-- 왼쪽 표 -->
+                            <div class="info-tables-left">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                        <th>회사명</th>
+                                        <td>{{ companyName }}</td>
+                                        </tr>
+                                        <tr>
+                                        <th>프로젝트명</th>
+                                        <td></td>
+                                        </tr>
+                                        <tr>
+                                        <th>담당자</th>
+                                        <td>{{ this.userData.name }}</td>
+                                        </tr>
+                                        <tr>
+                                        <th>견적일</th>
+                                        <td>견적일</td>
+                                        </tr>
+                                        <tr>
+                                        <th>출고일</th>
+                                        <td></td>
+                                        </tr>
+                                        <tr>
+                                        <th>배송방법</th>
+                                        <td>용차</td>
+                                        </tr>
+                                        <tr>
+                                        <th>결제방법</th>
+                                        <td>현금</td>
+                                        </tr>
+                                        <tr>
+                                        <th>견적기한</th>
+                                        <td>견적일로부터 5일 이내</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- 오른쪽 표 -->
+                            <div class="info-tables-right">
+                                <table class="info-table">
+                                    <tbody>
+                                        <tr>
+                                        <th>회사명</th>
+                                        <td>(주)이필</td>
+                                        </tr>
+                                        <tr>
+                                        <th>영업담당</th>
+                                        <td>윤영권 드림</td>
+                                        </tr>
+                                        <tr>
+                                        <th>전화</th>
+                                        <td>02-2054-8273</td>
+                                        </tr>
+                                        <tr>
+                                        <th>mobile</th>
+                                        <td>010-0000-0000</td>
+                                        </tr>
+                                        <tr>
+                                        <th>팩스</th>
+                                        <td>02-2054-8275</td>
+                                        </tr>
+                                        <tr>
+                                        <th>이메일</th>
+                                        <td>ipil@ipil.co.kr</td>
+                                        </tr>
+                                        <tr>
+                                        <th>유효기간</th>
+                                        <td>제출일로부터 30일</td>
+                                        </tr>
+                                        <tr>
+                                        <td colspan="2">서울시 송파구 송파대로 167, B동 1210호</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- 견적금액 -->
+                        <div class="total-amount">
+                        견적금액 : ₩ <span id="total-amount">{{ totalAmount }}</span> (VAT 별도)
+                        </div>
+                        <!-- 참고사항 및 특이사항 -->
+                        <div class="notes-section">
+                            <div class="notes">
+                                <h3>참고사항</h3>
+                                <ul>
+                                <li>출고일자는 영업일(토, 일, 공휴일 제외)을 계산하여 표기됩니다.</li>
+                                <li>견적조건(납기, 수량, 도면 등) 변경 시 견적 내용이 변경될 수 있습니다.</li>
+                                <li>기타 요청 사항은 별도의 협의가 필요합니다.</li>
+                                </ul>
+                            </div>
+                            <div class="special-notes">
+                                <h3>특이사항</h3>
+                                <p>입금계좌 - 기업은행 : 000-0000-0000-000 (주)이필</p>
+                            </div>
+                        </div>
+                        <!-- 부품 표 섹션 -->
+                        <div class="parts">
+                            <h3></h3>
+                            
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>순번</th>
+                                    <th>강종</th>
+                                    <th>구분</th>
+                                    <th>중량</th>
+                                    <th>금액(원)</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item, index) in quotationItems" :key="index">
+                                        <td>{{ index + 1 }}</td>
+                                        <td>{{ item.steelType }}</td>
+                                        <td>{{ item.category }}</td>
+                                        <td>{{ formatNumber(item.weight) }} kg</td>
+                                        <td>{{ item.price }}</td>
+                                    </tr>              
+                                <!-- 빈 행 -->
+                                <tr class="empty-row">
+                                    <td colspan="5">&nbsp;</td>
+                                </tr>
+                                <!-- 요약 행 -->
+                                <tr class="summary-row">
+                                    <td colspan="4" style="text-align:right;">공급가액 :</td>
+                                    <td>{{ totalAmount }} 원</td>
+                                    
+                                </tr>
+                                <tr class="summary-row">
+                                    <td colspan="4" style="text-align:right;">부가세 (10%) :</td>
+                                    <td>{{ totalAmount1 }} 원</td>
+                                    
+                                </tr>
+                                <tr class="summary-row">
+                                    <td colspan="4" style="text-align:right;">합계금액 :</td>
+                                    <td>{{ totalAmount2 }} 원</td>
+                                    
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
         
-                    <!-- 견적 정보 입력 -->
-                    <div class="quotation-header">
-                        <div class="left">
-                            <p><strong>문서번호 : </strong> {{ documentNumber }}</p>
-                            <p><strong>날짜 : </strong> {{ currentDate }}</p>
-                        </div>
-                        <div class="right">
-                            <p><strong>공급자 : </strong> 주식회사 이필</p>
-                            <p><strong>대표이사 : </strong> 황 인 규</p>
-                            <p><strong>주소 : </strong> 서울특별시 송파구 충민로 167 문정역 테라타워 B동 1210호</p>
-                            <p><strong>연락처 : </strong> TEL: 02-2054-8273 / FAX: 02-2054-8275</p>
-                        </div>
+        
+                        
+
+                        
+
+
                     </div>
 
-                    <hr />
-
-                    <!-- 수신 정보 -->
-                    <div class="buyer-info">
-                        <p  class="buyer"><strong>수신 : </strong> {{ companyName }}</p>
-                        <p>하기와 같이 견적합니다.</p>
-                    </div>  
-
-                    <hr />
-
-                    <!-- 견적 테이블 -->
-                    <table class="quotation-table">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>강종</th>
-                                <th>구분</th>
-                                <th>중량</th>
-                                <th>금액</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(item, index) in quotationItems" :key="index">
-                                <td>{{ index + 1 }}</td>
-                                <td>{{ item.steelType }}</td>
-                                <td>{{ item.category }}</td>
-                                <td>{{ formatNumber(item.weight) }} kg</td>
-                                <td>{{ item.price }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <hr />
-
-                    <!-- 총 금액 -->
-                    <div class="total-sum-container">
-                        <p><strong>합계 금액 : </strong> {{ totalAmount }} 원 (부과세 별도)</p>
-                    </div>
-                    
                     <!-- 버튼 -->
                     <div class="result-container">
                         <button class="btn btn-print" @click="printQuotation">견적서 출력</button>
                         <button class="btn btn-close" @click="closeModal">닫기</button>
                     </div>
-                    
-                    <!-- 특이사항 -->
-                    <table class="special-notes">
-                        <thead>
-                            <tr>
-                                <th>특 이 사 항</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1. 운송비 별도</td>
-                            </tr>
-                        </tbody>
-                    </table>
 
                 </div>
-
-            </div>
+                
+            </div>            
+            
         </div>
+        
     </teleport>
 </template>
   
 <script>
+    import axios from 'axios';
     import html2canvas from "html2canvas";
     import jsPDF from "jspdf";
     
@@ -113,9 +209,28 @@
         },
         data() {
             return {
+                docNumber: '',
                 showCompanyModal: true,
-                companyName: ""
+                companyName: "",
             };
+        },
+        mounted() {
+            // 날짜 포맷: YYYYMMDD
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const formattedDate = `${year}${month}${day}`;
+        
+            // 문서번호 생성 및 localStorage 업데이트
+            let docCounter = localStorage.getItem('documentCounter');
+            if (!docCounter) {
+                docCounter = 1;
+            } else {
+                docCounter = parseInt(docCounter) + 1;
+            }
+            localStorage.setItem('documentCounter', docCounter);
+            this.docNumber = `NO : ${formattedDate}-IE-${String(docCounter).padStart(4, '0')}`;
         },
         emits: ["close"], // 부모 컴포넌트에 모달 닫기 이벤트 전달
         computed: {
@@ -135,6 +250,13 @@
             },
             totalAmount() {
                 return this.quotationItems.reduce((sum, item) => sum + parseInt(item.price.replace(/[^0-9]/g, ""), 10), 0).toLocaleString();
+            },
+            totalAmount1() {
+                return Math.round(parseInt(this.totalAmount.replace(/[^0-9]/g, ""), 10) * 0.1).toLocaleString();
+            },
+            totalAmount2() {
+                return (parseInt(this.totalAmount.replace(/[^0-9]/g, ""), 10) + 
+                        parseInt(this.totalAmount1.replace(/[^0-9]/g, ""), 10)).toLocaleString();
             }
         },
         methods: {
@@ -152,16 +274,6 @@
                 // ✅ 버튼 숨기기
                 const buttons = modalElement.querySelectorAll(".result-container");
                 buttons.forEach(button => button.style.display = "none");   //  PDF 변환 시 버튼 숨기기
-                const TotalCost = modalElement.querySelector(".total-sum-container");
-                // const originalMargin = TotalCost.style.marginBottom;
-                // TotalCost.style.marginBottom = "600px";                      //  PDF 변환 시 여백 추가
-
-                let dummySpacer = document.createElement("div");
-
-                if (TotalCost) {
-                    dummySpacer.style.height = "50px"; // ✅ PDF 변환 시 여백 추가
-                    TotalCost.parentNode.insertBefore(dummySpacer, TotalCost.nextSibling);
-                }
                 
                 try {
                     // ✅ html2canvas로 캡처하기 전에 **잠시 기다려서 마진 적용** (DOM 반영 시간 확보)
@@ -201,16 +313,72 @@
                         }
                     }
 
-                    pdf.save("견적서.pdf"); // PDF 파일 저장
+                    // PDF 파일 사용자 다운로드
+                    pdf.save("견적서.pdf"); 
+
+
+                    // PDF를 Blob 데이터로 변환
+                    const pdfBlob = pdf.output("blob");
+                    const pdfFile = new File([pdfBlob], "견적서.pdf", { type: "application/pdf" });
+
+                    // 서버로 전송하는 함수 호출
+                    await this.submitEstimate(pdfFile);
+
+
                 } catch (error) {
                     console.error("PDF 생성 중 오류 발생:", error);
                 } finally {
                     // 버튼 다시 보이기
                     buttons.forEach(button => button.style.display = "flex");
-                    // ✅ 가짜 마진 요소 제거
-                    if (dummySpacer) {
-                        dummySpacer.remove();
+                }
+            },
+            async submitEstimate(pdfFile) {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const formData = new FormData();
+                formData.append('estimateFile', pdfFile);
+                formData.append('projectName', this.userData.email || "Unknown");
+                formData.append('productType', this.companyName);
+
+                try {
+                    const uploadResponse = await axios.post(`${apiUrl}/api/upload-estimate`, formData, {
+                        onUploadProgress: progressEvent => {
+                            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                            this.uploadProgress = percentCompleted;
+                        }
+                    });
+                    
+                    const uploadData = uploadResponse.data;
+                    if (!uploadData.success) {
+                        // alert(uploadData.message || "파일 업로드에 실패했습니다.");
+                        return;
                     }
+
+                    // ✅ 견적 요청 데이터 전송
+                    const estimatePayload = {
+                        username: this.userData.username,
+                        name: this.userData.name,
+                        phone: this.userData.phone,
+                        projectName: this.userData.email || "Unknown",
+                        productType: this.companyName,
+                        fileUrl: uploadData.fileUrl,
+                        fileName: uploadData.fileName
+                    };
+
+                    const estimateRes = await axios.post(`${apiUrl}/api/estimate-request`, estimatePayload, {
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (!estimateRes.data.success) {
+                        // alert(estimateRes.data.message || "견적 요청 제출에 실패했습니다.");
+                        return;
+                    }
+
+                    // alert("견적 요청이 제출되었습니다.");
+                    // this.close();
+
+                } catch (err) {
+                    console.error("파일 업로드 또는 요청 전송 오류:", err);
+                    // alert("전송 중 오류 발생");
                 }
             },
             formatNumber(value) {
@@ -228,106 +396,283 @@
 </script>
   
 <style scoped>
-    /* 모달 스타일 */
-    .modal-overlay {
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+/* 모달 스타일 */
+.modal-overlay {
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 1);
+    display: flex;
+    justify-content: center; 
+    align-items: center; /* 🔹 상단 정렬로 변경 */
+    overflow: hidden;
+    padding-top: 0;
+}
 
-    /* 회사명 입력 필드 */
-    .modal {
-        max-width: 90%;
-        background: white;
-        border-radius: 10px;
-        text-align: center;
-    }
-    .modal-content {
-        width: 300px;
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    .modal-content input {
-        width: 90%;
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px solid black;
-        margin: 10px 0;
-    }
-    .modal-content button {
-        width: 50%;
-        background-color: #007bff;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-        font-size: 14px;
-    }
-    .modal-content button:hover {
-        background-color: #0056b3;
-    }
+/* 회사명 입력 필드 */
+.modal {
+    max-width: 90%;
+    background: white;
+    border-radius: 10px;
+    text-align: center;
+}
+.modal-content {
+    width: 300px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+.modal-content input {
+    width: 90%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid black;
+    margin: 10px 0;
+}
+.modal-content button {
+    width: 50%;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.modal-content button:hover {
+    background-color: #0056b3;
+}
 
-    /* 견적서 입력 필드 */
-    .quotation-page {
-        background-color: #FFFFFF;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 100vh;
-    }
-    .quotation-container {
-        width: 80%;
-        margin: 0 auto;
-        padding: 20px;
-        border: 2px solid black;
-        text-align: center;
-    }
+/* 견적서 입력 필드 */
+.quotation-contents {
+    width: 98%;
+    height: calc(100vh - 50px); /* 🔹 화면 전체 높이에서 padding 값을 제외한 높이 */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* 🔹 상단 정렬 */
+    overflow-y: auto; /* 🔹 스크롤을 여기에서만 활성화 */
+    padding-bottom: 20px; /* 🔹 스크롤 끝에 여백 추가 */
+}
 
-    /* 공급자 입력 필드 */
-    .quotation-header {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-    }
-    .left, .right {
-        text-align: left;
-    }
+.quotation-page {
+    width: 794px;
+    min-height: 1120px; /* 🔹 최소 A4 크기 유지 */
+    background: white;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transform-origin: top left;
+    transform: scale(1);
+    flex-shrink: 0;
+    padding: 20px;
+}
 
-    /* 수신자 입력 필드 */
-    .buyer-info .buyer {
-        text-align: left;
-    }
+.quotation-container {
+    width: 90%;
+    border: 2px solid black;
+    margin: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-grow: 1;
+}
+ 
+  /* 문서번호 표시 스타일 */
+  .header-info {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 5px;
+  }
+  
+  .document-number {
+    font-size: 0.85em;
+    font-weight: bold;
+  }
+  
+  .title {
+    text-align: center;
+    align-items: center;
+    font-size: 1.6em;
+    font-weight: bold;
+    margin: 5px 0;
+    margin-top: 50px;
+    margin-bottom: 20px;
+  }
+  
+  .info-section {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  
+  .info-tables-left,
+  .info-tables-right {
+    width: 48%;
+  }
+  
+  /* 왼쪽 표 스타일 */
+  .info-tables-left table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 3px;
+  }
+  
+  .info-tables-left th,
+  .info-tables-left td {
+    border: 1px solid #ddd;
+    padding: 3px;
+    text-align: left;
+    vertical-align: middle;
+  }
+  
+  .info-tables-left th {
+    background-color: #f2f2f2;
+    width: 30%;
+  }
+  
+  /* 오른쪽 표 스타일 */
+  .info-tables-right table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .info-tables-right th,
+  .info-tables-right td {
+    border: 1px solid #ddd;
+    padding: 3px;
+    text-align: left;
+    vertical-align: middle;
+  }
+  
+  .info-tables-right th {
+    background-color: #f2f2f2;
+    width: 30%;
+  }
+  
+  /* 견적금액 스타일 */
+  .total-amount {
+    margin-bottom: 5px;
+    font-size: 0.95em;
+    font-weight: bold;
+  }
+  
+  /* 참고사항 및 특이사항 섹션 */
+  .notes-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  
+  .notes,
+  .special-notes {
+    width: 48%;
+  }
+  
+  .notes h3,
+  .special-notes h3 {
+    margin-bottom: 3px;
+    font-size: 0.95em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 2px;
+  }
+  
+  .notes ul {
+    list-style: decimal;
+    padding-left: 15px;
+    margin: 0;
+  }
+  
+  .notes ul li {
+    margin-bottom: 2px;
+  }
+  
+  .special-notes p {
+    margin: 0;
+  }
+  
+  /* 부품 표 섹션 */
+  .parts {
+    width: 100%;
+    margin-bottom: 15px;
+    justify-content: space-between;
+  }
+  
+  .parts h3 {
+    margin-bottom: 3px;
+    font-size: 0.95em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 2px;
+  }
+  
+  .parts table {
+    width: 100%;
+    text-align: center;
+    align-items: center;
+    margin: 0 auto;
+    border-collapse: collapse;
+  }
+  
+  .parts th,
+  .parts td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    vertical-align: middle;
+  }
+  
+  .parts th {
+    background-color: #f2f2f2;
+  }
 
-    /* 견적 내용 입력 필드 */
-    .quotation-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-    .quotation-table th, .quotation-table td {
-        border: 1px solid black;
-        padding: 10px;
-        text-align: center;
-    }
+  /* 금액 열 오른쪽 정렬 */
+  .parts td:nth-child(4), .parts td:nth-child(5) {
+    text-align: right;
+    padding-right: 20px;
+  }
 
-    /* 합계 금액 입력 필드 */
-    .total-sum-container {
-        text-align: right;
-        margin-top: 20px;
-        font-size: 18px;
-    }
+  
+  /* 합계, 부가세, 총합 */
+  .parts .summary-row td {
+    font-weight: bold;
+    text-align: right;
+    padding-right: 20px;
+  }
+  
+  
+  /* 빈 행 스타일 */
+  .parts .empty-row td {
+    border: none;
+    padding: 2px;
+    height: 5px;
+  }
+  
+  /* 액션 버튼 스타일 */
+  .action-buttons {
+    text-align: center;
+    margin: 10px 0;
+  }
+  
+  .action-buttons button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+  }
+  
+  .action-buttons button:hover {
+    background-color: #45a049;
+  }
 
     /* 결과 버튼 필드 */
     .result-container {
@@ -360,51 +705,7 @@
         background-color: darkblue;
     }
 
-    /* 특이 사항 */
-    .special-notes {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        font-size: 14px;
-    }
-    .special-notes th {
-        background-color: #ddd;
-        padding: 10px;
-        text-align: center;
-        border: 1px solid #ccc;
-    }
-    .special-notes td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
-    }
 
-    /* 기본사항 */
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    input {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: center;
-    }
-    th {
-        background-color: #f4f4f4;
-    }
     .btn {
         padding: 10px 15px;
         border: none;
