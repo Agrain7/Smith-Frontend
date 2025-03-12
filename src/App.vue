@@ -51,6 +51,7 @@ export default {
 body {
   margin: 0;
   font-family: Arial, sans-serif;
+  overflow: auto;
 }
 
 /* #app 전체에 세로 중앙 정렬 적용 */

@@ -1,22 +1,24 @@
 <!-- frontend/src/components/newEstimateRequestModal.vue -->
 <template>
     <teleport to="body">
-        <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
+        <div v-show="isOpen" class="modal-overlay" @click.self="closeModal">
 
             <!-- 회사명 입력 모달 -->
             <div v-if="showCompanyModal" class="modal">
                 <div class="modal-content">
                     <h3>회사명을 입력하세요</h3>
                     <input type="text" v-model="companyName" placeholder="회사명을 입력하세요">
+                    <p v-if="companyNameError" style="color: red; font-size: 12px;">회사명을 입력하세요.</p>
                     <button @click="saveCompanyName">확인</button>
                 </div>
             </div>
 
             <!-- 견적서 모달 -->
-            <div v-else class="quotation-contents">
-                <div ref="quotationModal" class="quotation-page">
+            <div v-if="showEstimateModal" ref="quotationContents" id="contents1" class="quotation-contents">
+                
+                <div ref="quotationModal" id="contents2" class="quotation-page">
 
-                    <div class="quotation-container">
+                    <div id="contents3" class="quotation-container">
 
 
                         <!-- 헤더: 문서번호 -->
@@ -107,12 +109,14 @@
                         </div>
                         <!-- 견적금액 -->
                         <div class="total-amount">
-                        견적금액 : ₩ <span id="total-amount">{{ totalAmount }}</span> (VAT 별도)
+                        <span>견적금액 : ₩ &nbsp;</span><span id="total-amount">{{ totalAmount.toLocaleString() }}</span> (VAT 별도)
                         </div>
+
                         <!-- 참고사항 및 특이사항 -->
                         <div class="notes-section">
                             <div class="notes">
                                 <h3>참고사항</h3>
+                                <div class="Divideline"></div>
                                 <ul>
                                 <li>출고일자는 영업일(토, 일, 공휴일 제외)을 계산하여 표기됩니다.</li>
                                 <li>견적조건(납기, 수량, 도면 등) 변경 시 견적 내용이 변경될 수 있습니다.</li>
@@ -121,13 +125,15 @@
                             </div>
                             <div class="special-notes">
                                 <h3>특이사항</h3>
+                                <div class="Divideline"></div>
                                 <p>입금계좌 - 기업은행 : 000-0000-0000-000 (주)이필</p>
                             </div>
                         </div>
+
+                        <div class="Divideline"></div>
+
                         <!-- 부품 표 섹션 -->
                         <div class="parts">
-                            <h3></h3>
-                            
                             <table>
                                 <thead>
                                 <tr>
@@ -153,17 +159,17 @@
                                 <!-- 요약 행 -->
                                 <tr class="summary-row">
                                     <td colspan="4" style="text-align:right;">공급가액 :</td>
-                                    <td>{{ totalAmount }} 원</td>
+                                    <td>{{ totalAmount.toLocaleString() }} 원</td>
                                     
                                 </tr>
                                 <tr class="summary-row">
                                     <td colspan="4" style="text-align:right;">부가세 (10%) :</td>
-                                    <td>{{ totalAmount1 }} 원</td>
+                                    <td>{{ vatAmount.toLocaleString() }} 원</td>
                                     
                                 </tr>
                                 <tr class="summary-row">
                                     <td colspan="4" style="text-align:right;">합계금액 :</td>
-                                    <td>{{ totalAmount2 }} 원</td>
+                                    <td>{{ finalAmount.toLocaleString() }} 원</td>
                                     
                                 </tr>
                                 </tbody>
@@ -172,10 +178,6 @@
 
 
         
-        
-                        
-
-                        
 
 
                     </div>
@@ -211,7 +213,9 @@
             return {
                 docNumber: '',
                 showCompanyModal: true,
+                showEstimateModal: false,
                 companyName: "",
+                companyNameError: false,
             };
         },
         mounted() {
@@ -231,9 +235,20 @@
             }
             localStorage.setItem('documentCounter', docCounter);
             this.docNumber = `NO : ${formattedDate}-IE-${String(docCounter).padStart(4, '0')}`;
+            
+            this.disableScroll;
         },
         emits: ["close"], // 부모 컴포넌트에 모달 닫기 이벤트 전달
         computed: {
+            disableScroll() {
+                if (this.isOpen) {
+                    document.documentElement.style.overflow = 'hidden'; // 스크롤 막기
+                    
+                } else {
+                    document.documentElement.style.overflow = 'auto'; // 스크롤 복원
+                }
+                return this.isOpen; // 값 반환 (실제 사용은 안 하지만 computed 요구사항)
+            },
             currentDate() {
                 let today = new Date();
                 let year = today.getFullYear();
@@ -249,14 +264,13 @@
                 return `IP-${year}${month}${day}-`;
             },
             totalAmount() {
-                return this.quotationItems.reduce((sum, item) => sum + parseInt(item.price.replace(/[^0-9]/g, ""), 10), 0).toLocaleString();
+                return this.quotationItems.reduce((sum, item) => sum + parseInt(item.price.replace(/[^0-9]/g, ""), 10), 0);
             },
-            totalAmount1() {
-                return Math.round(parseInt(this.totalAmount.replace(/[^0-9]/g, ""), 10) * 0.1).toLocaleString();
+            vatAmount() {
+                return Math.round(this.totalAmount * 0.1);
             },
-            totalAmount2() {
-                return (parseInt(this.totalAmount.replace(/[^0-9]/g, ""), 10) + 
-                        parseInt(this.totalAmount1.replace(/[^0-9]/g, ""), 10)).toLocaleString();
+            finalAmount() {
+                return this.totalAmount + this.vatAmount;
             }
         },
         methods: {
@@ -277,7 +291,7 @@
                 
                 try {
                     // ✅ html2canvas로 캡처하기 전에 **잠시 기다려서 마진 적용** (DOM 반영 시간 확보)
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await this.$nextTick(); // 비동기적으로 PDF 변환을 처리하기 위해 DOM 반영 시간을 확보
 
                     const canvas = await html2canvas(modalElement, {
                         scale: 2,            // 고해상도 캡처
@@ -314,7 +328,8 @@
                     }
 
                     // PDF 파일 사용자 다운로드
-                    pdf.save("견적서.pdf"); 
+                    pdf.save("견적서.pdf");
+                    // pdf.save(`견적서_${this.docNumber}.pdf`);   // 문서번호를 파일명으로 지정
 
 
                     // PDF를 Blob 데이터로 변환
@@ -385,18 +400,32 @@
                 return value ? value.toLocaleString() : "0";
             },
             saveCompanyName() {
-                if (!this.companyName) {
-                    alert("회사명을 입력해주세요!");
+                if (!this.companyName.trim()) {
+                    this.companyNameError = true;
                     return;
                 }
+                this.companyNameError = false;
                 this.showCompanyModal = false;
+                this.showEstimateModal = true;
             },
+        },
+        beforeUnmount() {
+            // ✅ 컴포넌트가 제거될 때 스크롤 복원
+            document.documentElement.style.overflow = 'auto';
         }
+
     };
 </script>
   
 <style scoped>
 /* 모달 스타일 */
+body {
+    width: 100%;
+    overflow-x: auto; /* ✅ 가로 스크롤 가능하도록 설정 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .modal-overlay {
     position: fixed;
     z-index: 1000;
@@ -408,8 +437,8 @@
     display: flex;
     justify-content: center; 
     align-items: center; /* 🔹 상단 정렬로 변경 */
-    overflow: hidden;
     padding-top: 0;
+    overflow-x: auto;
 }
 
 /* 회사명 입력 필드 */
@@ -453,12 +482,21 @@
     width: 98%;
     height: calc(100vh - 50px); /* 🔹 화면 전체 높이에서 padding 값을 제외한 높이 */
     display: flex;
-    justify-content: center;
-    align-items: flex-start; /* 🔹 상단 정렬 */
-    overflow-y: auto; /* 🔹 스크롤을 여기에서만 활성화 */
-    padding-bottom: 20px; /* 🔹 스크롤 끝에 여백 추가 */
+    overflow: auto;  /* 🔹 스크롤은 여기에서만 활성화 */
+    padding: 20px 0;  /* 🔹 스크롤 끝에 여백 추가 */
+    position: absolute;
 }
-
+.quotation-contents::-webkit-scrollbar {
+    width: 10px; /* 가로 스크롤바 */
+    height: 10px; /* 세로 스크롤바 */
+}
+.quotation-contents::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3); /* 스크롤바 색상 */
+    border-radius: 5px;
+}
+.quotation-contents::-webkit-scrollbar-track {
+    background: transparent; /* 트랙 배경 투명 처리 */
+}
 .quotation-page {
     width: 794px;
     min-height: 1120px; /* 🔹 최소 A4 크기 유지 */
@@ -466,10 +504,11 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    transform-origin: top left;
+    transform-origin: center center;
     transform: scale(1);
     flex-shrink: 0;
     padding: 20px;
+    margin: auto;
 }
 
 .quotation-container {
@@ -484,19 +523,19 @@
     flex-grow: 1;
 }
  
-  /* 문서번호 표시 스타일 */
-  .header-info {
+/* 문서번호 표시 스타일 */
+.header-info {
     display: flex;
     justify-content: flex-start;
     margin-top: 5px;
-  }
+}
   
-  .document-number {
+.document-number {
     font-size: 0.85em;
     font-weight: bold;
-  }
-  
-  .title {
+}
+
+.title {
     text-align: center;
     align-items: center;
     font-size: 1.6em;
@@ -504,162 +543,160 @@
     margin: 5px 0;
     margin-top: 50px;
     margin-bottom: 20px;
-  }
-  
-  .info-section {
+}
+
+.info-section {
     width: 100%;
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
-  }
-  
-  .info-tables-left,
-  .info-tables-right {
+}
+
+.info-tables-left,
+.info-tables-right {
     width: 48%;
-  }
-  
-  /* 왼쪽 표 스타일 */
-  .info-tables-left table {
+}
+
+/* 왼쪽 표 스타일 */
+.info-tables-left table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 3px;
-  }
-  
-  .info-tables-left th,
-  .info-tables-left td {
+}
+
+.info-tables-left th,
+.info-tables-left td {
     border: 1px solid #ddd;
     padding: 3px;
     text-align: left;
     vertical-align: middle;
-  }
-  
-  .info-tables-left th {
+}
+
+.info-tables-left th {
     background-color: #f2f2f2;
     width: 30%;
-  }
-  
-  /* 오른쪽 표 스타일 */
-  .info-tables-right table {
+}
+
+/* 오른쪽 표 스타일 */
+.info-tables-right table {
     width: 100%;
     border-collapse: collapse;
-  }
-  
-  .info-tables-right th,
-  .info-tables-right td {
+}
+
+.info-tables-right th,
+.info-tables-right td {
     border: 1px solid #ddd;
     padding: 3px;
     text-align: left;
     vertical-align: middle;
-  }
-  
-  .info-tables-right th {
+}
+
+.info-tables-right th {
     background-color: #f2f2f2;
     width: 30%;
-  }
-  
-  /* 견적금액 스타일 */
-  .total-amount {
+}
+
+/* 견적금액 스타일 */
+.total-amount {
     margin-bottom: 5px;
     font-size: 0.95em;
     font-weight: bold;
-  }
-  
-  /* 참고사항 및 특이사항 섹션 */
-  .notes-section {
+}
+
+/* 참고사항 및 특이사항 섹션 */
+.notes-section {
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
-  }
-  
-  .notes,
-  .special-notes {
+}
+
+.notes,
+.special-notes {
     width: 48%;
-  }
-  
-  .notes h3,
-  .special-notes h3 {
+}
+
+.notes h3,
+.special-notes h3 {
     margin-bottom: 3px;
     font-size: 0.95em;
-    border-bottom: 1px solid #ddd;
     padding-bottom: 2px;
-  }
-  
-  .notes ul {
+}
+
+.notes ul {
     list-style: decimal;
     padding-left: 15px;
     margin: 0;
-  }
-  
-  .notes ul li {
+}
+
+.notes ul li {
     margin-bottom: 2px;
-  }
-  
-  .special-notes p {
+}
+
+.special-notes p {
     margin: 0;
-  }
-  
-  /* 부품 표 섹션 */
-  .parts {
+}
+
+/* 부품 표 섹션 */
+.parts {
     width: 100%;
     margin-bottom: 15px;
     justify-content: space-between;
-  }
-  
-  .parts h3 {
+}
+
+.parts h3 {
     margin-bottom: 3px;
     font-size: 0.95em;
-    border-bottom: 1px solid #ddd;
     padding-bottom: 2px;
-  }
-  
-  .parts table {
+}
+
+.parts table {
     width: 100%;
     text-align: center;
     align-items: center;
     margin: 0 auto;
     border-collapse: collapse;
-  }
-  
-  .parts th,
-  .parts td {
+}
+
+.parts th,
+.parts td {
     border: 1px solid #ddd;
     padding: 6px;
     vertical-align: middle;
-  }
-  
-  .parts th {
-    background-color: #f2f2f2;
-  }
+}
 
-  /* 금액 열 오른쪽 정렬 */
-  .parts td:nth-child(4), .parts td:nth-child(5) {
+.parts th {
+    background-color: #f2f2f2;
+}
+
+/* 금액 열 오른쪽 정렬 */
+.parts td:nth-child(4), .parts td:nth-child(5) {
     text-align: right;
     padding-right: 20px;
-  }
+}
 
-  
-  /* 합계, 부가세, 총합 */
-  .parts .summary-row td {
+
+/* 합계, 부가세, 총합 */
+.parts .summary-row td {
     font-weight: bold;
     text-align: right;
     padding-right: 20px;
-  }
-  
-  
-  /* 빈 행 스타일 */
-  .parts .empty-row td {
+}
+
+
+/* 빈 행 스타일 */
+.parts .empty-row td {
     border: none;
     padding: 2px;
     height: 5px;
-  }
-  
-  /* 액션 버튼 스타일 */
-  .action-buttons {
+}
+
+/* 액션 버튼 스타일 */
+.action-buttons {
     text-align: center;
     margin: 10px 0;
-  }
-  
-  .action-buttons button {
+}
+
+.action-buttons button {
     background-color: #4CAF50;
     color: white;
     padding: 10px 20px;
@@ -668,50 +705,57 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 1em;
-  }
-  
-  .action-buttons button:hover {
+}
+
+.action-buttons button:hover {
     background-color: #45a049;
-  }
+}
 
-    /* 결과 버튼 필드 */
-    .result-container {
-        margin-top: 20px;
-        display: flex;
-        text-align: center;
-        justify-content: center;
-        gap: 10px;
-    }
-    .result-container .btn-print {
-        padding: 10px 15px;
-        background-color: blue;
-        color: white;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-    .result-container .btn-print:hover {
-        background-color: darkblue;
-    }
-    .result-container .btn-close {
-        padding: 10px 15px;
-        background-color: blue;
-        color: white;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-    .result-container .btn-close:hover {
-        background-color: darkblue;
-    }
+/* 결과 버튼 필드 */
+.result-container {
+    margin-top: 20px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    gap: 10px;
+}
+.result-container .btn-print {
+    padding: 10px 15px;
+    background-color: blue;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.result-container .btn-print:hover {
+    background-color: darkblue;
+}
+.result-container .btn-close {
+    padding: 10px 15px;
+    background-color: blue;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.result-container .btn-close:hover {
+    background-color: darkblue;
+}
 
 
-    .btn {
-        padding: 10px 15px;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-        font-size: 14px;
-    }
+.btn {
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.Divideline {
+    width: 100%;
+    height: 2px;
+    background-color: #ddd;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
 </style>
   
