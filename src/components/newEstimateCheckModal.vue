@@ -18,7 +18,7 @@
           <div class="footer-actions">
             <!-- 세부견적 요청하러 가기 (링크) -->
             <p class="estimate-link">
-              <a href="http://pf.kakao.com/_jxmXnn/chat" target="_blank" rel="noopener noreferrer">
+              <a href="http://pf.kakao.com/_Painn/chat" target="_blank" rel="noopener noreferrer">
                 세부견적 요청하러 가기
               </a>
             </p>
