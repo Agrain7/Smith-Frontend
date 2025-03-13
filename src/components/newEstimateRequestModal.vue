@@ -763,7 +763,7 @@ body {
 
 @media (max-width: 786px) {
     .quotation-page {
-        transform: scale(0.5); /* ✅ 작은 화면에서 자동 축소 */
+        transform: scale(0.6); /* ✅ 작은 화면에서 자동 축소 */
     }
 }
 
