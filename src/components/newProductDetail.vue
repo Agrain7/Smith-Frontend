@@ -76,7 +76,7 @@
         class="estimate-button"
         :class="{ disabled: !isLoggedIn }"
         @click="handleEstimateCheck">
-        견적요청
+        세부견적요청
       </button>
     </div>
 
